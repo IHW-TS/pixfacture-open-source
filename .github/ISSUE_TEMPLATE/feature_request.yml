@@ -1,0 +1,38 @@
+name: Proposition d'amélioration
+description: Proposer une évolution de PixFacture
+title: "[Feature] "
+labels:
+  - enhancement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problème à résoudre
+      description: Quel besoin utilisateur ou de maintenance motive cette proposition ?
+    validations:
+      required: true
+  - type: textarea
+    id: proposal
+    attributes:
+      label: Solution proposée
+      description: Décrivez le comportement souhaité sans donnée confidentielle.
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Zone concernée
+      options:
+        - Facturation
+        - Facturation électronique
+        - Expérience utilisateur
+        - Sécurité
+        - Exploitation
+        - Documentation
+        - Autre
+    validations:
+      required: true
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives envisagées

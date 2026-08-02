@@ -1,0 +1,17 @@
+<!doctype html>
+<html>
+<body style="font-family:Arial, sans-serif; color:#111; line-height:1.6; padding:16px;">
+  <div style="margin:0 0 8px 0;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#475569;">
+    {{ brand_name or product_name or 'PixFacture' }}
+  </div>
+  <h2 style="margin:0 0 12px 0;">Vérifiez votre adresse email</h2>
+  <p>Bonjour,</p>
+  <p>Confirmez cette adresse email pour activer votre espace {{ company_name }} sur {{ product_name or 'PixFacture' }}.</p>
+  <p>Cette vérification sécurise votre accès et permet de recevoir les notifications transactionnelles liées à votre compte.</p>
+  <p>
+    <a href="{{ verify_url }}" style="background:#0f172a;color:#fff;padding:10px 16px;text-decoration:none;border-radius:6px;display:inline-block;">Vérifier mon email</a>
+  </p>
+  <p>Si vous n'êtes pas à l'origine de cette demande, ignorez cet email.</p>
+  <p style="margin-top:18px;color:#64748b;font-size:12px;">Vous recevez cet email car une vérification d’adresse a été demandée sur {{ product_name or 'PixFacture' }}.</p>
+</body>
+</html>

@@ -1,0 +1,39 @@
+[tool.black]
+line-length = 120
+target-version = ["py312"]
+include = '\.pyi?$'
+extend-exclude = '''
+/(
+  alembic
+  | tests
+)/
+'''
+
+[tool.ruff]
+line-length = 120
+target-version = "py312"
+extend-exclude = ["backend/alembic", "backend/tests"]
+
+[tool.ruff.lint]
+select = ["E", "F"]
+ignore = ["E501"]
+
+[tool.mypy]
+python_version = "3.12"
+ignore_missing_imports = true
+warn_unused_ignores = true
+no_implicit_optional = true
+plugins = ["sqlalchemy.ext.mypy.plugin"]
+
+[tool.pytest.ini_options]
+filterwarnings = [
+  "ignore:Support for class-based `config` is deprecated.*:DeprecationWarning:pydantic\\._internal\\._config",
+  "ignore:'crypt' is deprecated and slated for removal in Python 3\\.13:DeprecationWarning:passlib\\.utils",
+  "ignore:datetime\\.datetime\\.utcnow\\(\\) is deprecated.*:DeprecationWarning:jose\\.jwt",
+  "ignore:transform is deprecated, use set_matrix instead\\.:DeprecationWarning:pydyf",
+  "ignore:text_matrix is deprecated, use set_text_matrix instead\\.:DeprecationWarning:pydyf",
+]
+
+[tool.bandit]
+exclude = ["backend/tests", "backend/alembic"]
+skips = ["B101"]

@@ -1,0 +1,1018 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% if invoice.type == 'credit_note' %}Avoir{% elif invoice.type == 'quote' %}Devis{% else %}Facture{% endif %} {{ invoice.number or '' }}</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 12mm;
+      }
+
+      :root {
+        --navy: #13294b;
+        --navy-2: #1d365f;
+        --blue: #2455d6;
+        --blue-soft: #eef4ff;
+        --blue-border: #cfe0ff;
+        --ink: #162033;
+        --body: #41506a;
+        --muted: #6c7d96;
+        --faint: #99a7bc;
+        --line: #dbe5f2;
+        --bg: #f3f7fc;
+        --card: #ffffff;
+        --card-soft: #f8fbff;
+        --green: #178548;
+        --green-bg: #ebfbf1;
+        --green-border: #c7efd5;
+        --amber: #9a5800;
+        --amber-bg: #fff7e6;
+        --amber-border: #f8d99b;
+        --red: #b42318;
+        --red-bg: #fff1f1;
+        --red-border: #f6c7c7;
+        --shadow: 0 12px 28px rgba(17, 33, 63, 0.08);
+      }
+
+      body.theme-graphite {
+        --navy: #1b2432;
+        --navy-2: #2a3445;
+        --blue: #3257b8;
+        --blue-soft: #f1f5fb;
+        --blue-border: #d6dfef;
+        --ink: #171f2b;
+        --body: #4c5564;
+        --muted: #6d7788;
+        --faint: #98a2b3;
+        --line: #dde4ee;
+        --bg: #f5f7fa;
+        --card-soft: #fafbfd;
+      }
+
+      body.theme-ivory {
+        --navy: #51402d;
+        --navy-2: #6d5439;
+        --blue: #a16207;
+        --blue-soft: #fff8ec;
+        --blue-border: #f2ddaf;
+        --ink: #3f2f1e;
+        --body: #685645;
+        --muted: #836f5d;
+        --faint: #a08f80;
+        --line: #eadfcf;
+        --bg: #fffaf3;
+        --card-soft: #fffdf8;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: DejaVu Sans, Arial, sans-serif;
+        font-size: 10.5px;
+        line-height: 1.45;
+        color: var(--ink);
+        background: #ffffff;
+      }
+
+      p, h1, h2, h3 {
+        margin: 0;
+      }
+
+      .page {
+        position: relative;
+        padding-top: 2.5mm;
+      }
+
+      .page-head {
+        display: flex;
+        gap: 8mm;
+        align-items: flex-start;
+        margin-bottom: 5mm;
+        page-break-inside: avoid;
+      }
+
+      .title-panel {
+        flex: 1;
+        min-width: 0;
+        padding-top: 1.5mm;
+      }
+
+      .eyebrow {
+        margin-bottom: 2mm;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.18em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .title-row {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 5mm;
+      }
+
+      .title-copy {
+        min-width: 0;
+      }
+
+      .page-title {
+        font-size: 21px;
+        line-height: 1.02;
+        letter-spacing: -0.04em;
+        font-weight: 900;
+        color: var(--ink);
+      }
+
+      .page-ref {
+        margin-top: 1.2mm;
+        font-size: 12px;
+        font-weight: 800;
+        color: var(--blue);
+      }
+
+      .page-subline {
+        margin-top: 2.4mm;
+        font-size: 9.3px;
+        color: var(--muted);
+      }
+
+      .status-badge {
+        display: inline-block;
+        padding: 2mm 3.6mm;
+        border-radius: 999px;
+        border: 1px solid var(--green-border);
+        background: var(--green-bg);
+        color: var(--green);
+        font-size: 8.4px;
+        font-weight: 800;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .status-sent,
+      .status-issued,
+      .status-partial {
+        border-color: var(--amber-border);
+        background: var(--amber-bg);
+        color: var(--amber);
+      }
+
+      .status-overdue,
+      .status-canceled,
+      .status-refused {
+        border-color: var(--red-border);
+        background: var(--red-bg);
+        color: var(--red);
+      }
+
+      .status-draft,
+      .status-accepted,
+      .status-invoiced {
+        border-color: var(--blue-border);
+        background: var(--blue-soft);
+        color: var(--blue);
+      }
+
+      .summary-card {
+        width: 58mm;
+        flex-shrink: 0;
+        padding: 4.8mm 5.2mm;
+        border-radius: 14px;
+        border: 1px solid var(--line);
+        background: var(--card-soft);
+        page-break-inside: avoid;
+      }
+
+      .summary-kicker {
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .summary-amount {
+        margin-top: 1.6mm;
+        font-size: 20px;
+        line-height: 1;
+        letter-spacing: -0.04em;
+        font-weight: 900;
+        color: var(--ink);
+      }
+
+      .summary-divider {
+        margin: 4.8mm 0 3.8mm;
+        height: 1px;
+        background: var(--line);
+      }
+
+      .summary-row {
+        display: flex;
+        align-items: flex-end;
+        justify-content: space-between;
+        gap: 4mm;
+      }
+
+      .summary-row .summary-kicker {
+        color: var(--muted);
+      }
+
+      .summary-secondary-amount {
+        font-size: 11.5px;
+        font-weight: 800;
+        color: var(--ink);
+      }
+
+      .document {
+        position: relative;
+        padding: 0;
+        background: transparent;
+      }
+
+      .document::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        right: 0;
+        height: 1.8mm;
+        background: linear-gradient(90deg, var(--blue) 0%, #5b5ff0 50%, #0d9488 100%);
+      }
+
+      .brand-panel {
+        display: flex;
+        gap: 5mm;
+        align-items: flex-start;
+        padding: 6mm 0 4.5mm;
+        page-break-inside: avoid;
+      }
+
+      .brand-media {
+        flex: 0 0 26mm;
+        min-width: 26mm;
+        display: flex;
+        align-items: flex-start;
+        justify-content: flex-start;
+      }
+
+      .issuer {
+        display: flex;
+        gap: 0;
+        max-width: none;
+        width: 100%;
+      }
+
+      .issuer-copy-wrap {
+        flex: 1;
+        min-width: 0;
+      }
+
+      .issuer-logo {
+        display: block;
+        max-width: 24mm;
+        max-height: 12mm;
+        width: auto;
+        height: auto;
+        border-radius: 0;
+        object-fit: contain;
+        background: transparent;
+        box-shadow: none;
+      }
+
+      .issuer-avatar {
+        width: 14mm;
+        height: 14mm;
+        border-radius: 6px;
+        background: var(--navy);
+        color: #fff;
+        font-size: 10px;
+        font-weight: 900;
+        text-align: center;
+        line-height: 14mm;
+        box-shadow: 0 3px 10px rgba(15, 30, 54, 0.14);
+      }
+
+      .issuer-name {
+        font-size: 16px;
+        line-height: 1.05;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+      }
+
+      .issuer-copy {
+        margin-top: 1.8mm;
+        font-size: 10px;
+        color: var(--muted);
+        line-height: 1.65;
+        max-width: 110mm;
+      }
+
+      .issuer-copy .muted-email {
+        color: #7d91b1;
+      }
+
+      .divider {
+        position: relative;
+        margin: 0 0 5.5mm;
+        height: 1px;
+        background: linear-gradient(90deg, rgba(36, 85, 214, 0.18) 0%, var(--line) 30%, var(--line) 100%);
+      }
+
+      .detail-strip {
+        display: flex;
+        width: 94%;
+        margin-right: auto;
+        margin-left: auto;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--card-soft);
+        page-break-inside: avoid;
+      }
+
+      .detail-item {
+        flex: 1;
+        padding: 3.5mm 4mm 3.2mm;
+        border-left: 1px solid var(--line);
+      }
+
+      .detail-item:first-child {
+        border-left: none;
+      }
+
+      .detail-label {
+        margin-bottom: 1.6mm;
+        font-size: 7.6px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .detail-value {
+        font-size: 11px;
+        line-height: 1.25;
+        font-weight: 800;
+        color: var(--ink);
+      }
+
+      .party-row {
+        display: flex;
+        align-items: stretch;
+        gap: 6mm;
+        margin-top: 6mm;
+        page-break-inside: avoid;
+      }
+
+      .party-card {
+        flex: 1;
+        border: 1px solid var(--line);
+        border-radius: 14px;
+        overflow: hidden;
+        background: var(--card);
+      }
+
+      .party-card.client {
+        border-color: var(--blue-border);
+        background: var(--card-soft);
+      }
+
+      .party-band {
+        padding: 3mm 4.5mm;
+        border-bottom: 1px solid var(--line);
+        background: linear-gradient(180deg, #f8fbff 0%, #f2f7fd 100%);
+      }
+
+      .party-card.client .party-band {
+        border-bottom-color: var(--blue-border);
+        background: linear-gradient(180deg, #edf4ff 0%, #deebff 100%);
+      }
+
+      .party-role {
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .party-card.client .party-role {
+        color: var(--blue);
+      }
+
+      .party-body {
+        padding: 4.2mm 4.5mm;
+      }
+
+      .party-name {
+        font-size: 15px;
+        line-height: 1.1;
+        font-weight: 900;
+        letter-spacing: -0.03em;
+        color: var(--ink);
+      }
+
+      .party-copy {
+        margin-top: 3mm;
+        font-size: 10px;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
+      .party-email {
+        margin-top: 2.6mm;
+        color: var(--blue);
+        font-weight: 500;
+      }
+
+      .party-identity {
+        margin-top: 3mm;
+        padding-top: 2.5mm;
+        border-top: 1px dashed var(--line);
+        font-size: 9px;
+        line-height: 1.55;
+        color: var(--muted);
+      }
+
+      .party-card.client .party-identity {
+        border-top-color: var(--blue-border);
+      }
+
+      .party-identity strong {
+        display: inline-block;
+        min-width: 12mm;
+        margin-right: 1.5mm;
+        font-size: 7.6px;
+        letter-spacing: 0.12em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .section-overline {
+        margin-top: 6.5mm;
+        margin-bottom: 3mm;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.16em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .table-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        overflow: hidden;
+        background: var(--card);
+        page-break-inside: avoid;
+      }
+
+      table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      .table-card table {
+        table-layout: fixed;
+      }
+
+      .table-card col.invoice-col-product {
+        width: auto;
+      }
+
+      .table-card col.invoice-col-qty {
+        width: 6.5%;
+      }
+
+      .table-card col.invoice-col-unit-price {
+        width: 22%;
+      }
+
+      .table-card col.invoice-col-vat {
+        width: 10.5%;
+      }
+
+      .table-card col.invoice-col-total {
+        width: 22.5%;
+      }
+
+      thead th {
+        padding: 4mm 4.5mm;
+        font-size: 7.6px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--faint);
+        text-align: left;
+        background: linear-gradient(180deg, #fbfdff 0%, #f4f8fd 100%);
+        border-bottom: 1px solid var(--line);
+      }
+
+      th.num,
+      td.num {
+        overflow: hidden;
+        padding-left: 1.2mm;
+        padding-right: 1.2mm;
+        text-align: right;
+        white-space: nowrap;
+        font-size: 8.2px;
+        font-variant-numeric: tabular-nums;
+      }
+
+      td.num strong {
+        display: inline-block;
+        max-width: 100%;
+        overflow: hidden;
+        vertical-align: bottom;
+        white-space: nowrap;
+      }
+
+      tbody td {
+        padding: 4mm 3.2mm;
+        border-bottom: 1px solid var(--line);
+        vertical-align: top;
+      }
+
+      tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .line-name {
+        font-size: 9.8px;
+        font-weight: 800;
+        color: var(--ink);
+        line-height: 1.25;
+        overflow-wrap: anywhere;
+      }
+
+      .line-detail {
+        margin-top: 1mm;
+        font-size: 8.8px;
+        color: var(--muted);
+        overflow-wrap: anywhere;
+      }
+
+      .line-section-title {
+        font-size: 10.4px;
+        font-weight: 900;
+        color: var(--accent-text);
+        background: #eff6ff;
+        letter-spacing: 0;
+      }
+
+      .line-comment-text {
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        font-size: 9.4px;
+        color: var(--muted);
+        line-height: 1.45;
+      }
+
+      .vat-chip {
+        display: inline;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font-size: inherit;
+        font-weight: 700;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .after-table {
+        display: flex;
+        gap: 5mm;
+        align-items: flex-start;
+        margin-top: 5mm;
+        page-break-inside: avoid;
+      }
+
+      .aside {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 4mm;
+      }
+
+      .info-card {
+        border: 1px solid var(--line);
+        border-radius: 16px;
+        background: var(--card-soft);
+        padding: 5mm;
+      }
+
+      .info-title {
+        margin-bottom: 2.2mm;
+        font-size: 8px;
+        font-weight: 700;
+        letter-spacing: 0.14em;
+        text-transform: uppercase;
+        color: var(--faint);
+      }
+
+      .info-copy {
+        font-size: 9.4px;
+        line-height: 1.7;
+        color: var(--body);
+      }
+
+      .info-copy strong {
+        color: var(--ink);
+      }
+
+      .multiline {
+        white-space: pre-line;
+      }
+
+      .totals-card {
+        width: 54mm;
+        flex-shrink: 0;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        overflow: hidden;
+        background: var(--card);
+        box-shadow: 0 6px 18px rgba(17, 33, 63, 0.05);
+      }
+
+      .totals-row {
+        display: flex;
+        justify-content: space-between;
+        gap: 4mm;
+        padding: 3mm 4mm;
+        border-top: 0.5px solid var(--line);
+      }
+
+      .totals-row:first-child {
+        border-top: none;
+      }
+
+      .totals-row .label {
+        color: var(--muted);
+        font-size: 9.4px;
+      }
+
+      .totals-row .value {
+        font-size: 10px;
+        font-weight: 800;
+        color: var(--ink);
+        white-space: nowrap;
+      }
+
+      .totals-row.total {
+        background: linear-gradient(135deg, #edf2ff 0%, #dfe8ff 100%);
+      }
+
+      .totals-row.total .label,
+      .totals-row.total .value {
+        font-size: 10.5px;
+        font-weight: 900;
+      }
+
+      .totals-row.balance {
+        background: var(--green-bg);
+      }
+
+      .totals-row.balance .label,
+      .totals-row.balance .value {
+        color: var(--green);
+      }
+
+      .footer {
+        margin-top: 6mm;
+        padding-top: 4mm;
+        border-top: 1px solid var(--line);
+        font-size: 8.8px;
+        line-height: 1.7;
+        color: var(--muted);
+      }
+
+      .footer-meta {
+        margin-top: 2mm;
+        color: var(--body);
+      }
+    </style>
+  </head>
+  {% set template_key = template_key or 'classic' %}
+  {% set template_options = template_options or {} %}
+  {% set show_delivery_address = template_options.get('show_delivery_address', true) %}
+  {% set show_purchase_order_number = template_options.get('show_purchase_order_number', true) %}
+  {% set show_note = template_options.get('show_note', true) %}
+  {% set custom_fields = template_options.get('custom_fields', []) %}
+  {% set doc_title = 'Facture' %}
+  {% if invoice.type == 'credit_note' %}
+    {% set doc_title = 'Avoir' %}
+  {% elif invoice.type == 'quote' %}
+    {% set doc_title = 'Devis' %}
+  {% endif %}
+  {% set status = (invoice.status or '')|lower %}
+  {% set status_label = None %}
+  {% if status == 'paid' %}
+    {% set status_label = 'Payée' %}
+  {% elif status in ['issued', 'sent'] %}
+    {% if invoice.type == 'quote' %}
+      {% set status_label = 'Émis' if status == 'issued' else 'Envoyé' %}
+    {% else %}
+      {% set status_label = 'Émise' if status == 'issued' else 'Envoyée' %}
+    {% endif %}
+  {% elif status == 'partial' %}
+    {% set status_label = 'Partiellement réglée' %}
+  {% elif status == 'overdue' %}
+    {% set status_label = 'En retard' %}
+  {% elif status == 'canceled' %}
+    {% set status_label = 'Annulée' %}
+  {% elif status == 'draft' %}
+    {% set status_label = 'Brouillon' %}
+  {% elif status == 'accepted' %}
+    {% set status_label = 'Accepté' %}
+  {% elif status == 'refused' %}
+    {% set status_label = 'Refusé' %}
+  {% elif status == 'invoiced' %}
+    {% set status_label = 'Facturé' %}
+  {% endif %}
+  {% set operation_nature_raw = invoice.operation_nature %}
+  {% set operation_nature_label = None %}
+  {% if operation_nature_raw %}
+    {% set operation_nature_value = operation_nature_raw|lower %}
+    {% if operation_nature_value == 'goods' %}
+      {% set operation_nature_label = 'Biens' %}
+    {% elif operation_nature_value == 'services' %}
+      {% set operation_nature_label = 'Services' %}
+    {% elif operation_nature_value == 'mixed' %}
+      {% set operation_nature_label = 'Biens et services' %}
+    {% else %}
+      {% set operation_nature_label = operation_nature_raw %}
+    {% endif %}
+  {% endif %}
+  <body class="theme-{{ template_key }}">
+    <div class="page">
+      <section class="document">
+        <div class="page-head">
+          <div class="title-panel">
+            <div class="eyebrow">Document de facturation</div>
+            <div class="title-row">
+              <div class="title-copy">
+                <div class="page-title">{{ doc_title }}</div>
+                <div class="page-ref">Réf. {{ invoice.number or 'Brouillon' }}</div>
+              </div>
+              {% if status_label %}
+              <span class="status-badge status-{{ status }}">{{ status_label }}</span>
+              {% endif %}
+            </div>
+            <div class="page-subline">
+              {% if invoice.issue_date %}Émise le {{ invoice.issue_date|fr_date }}{% endif %}
+              {% if invoice.service_date %} · Date de prestation le {{ invoice.service_date|fr_date }}{% endif %}
+              {% if invoice.due_date %} · Échéance le {{ invoice.due_date|fr_date }}{% endif %}
+            </div>
+          </div>
+
+          <div class="summary-card">
+            <div class="summary-kicker">Montant TTC</div>
+            <div class="summary-amount">{{ totals.ttc|fr_amount }}</div>
+            {% if invoice.balance_due is not none and invoice.type != 'quote' and totals.prepaid %}
+            <div class="summary-divider"></div>
+            <div class="summary-row">
+              <span class="summary-kicker">Reste dû</span>
+              <span class="summary-secondary-amount">{{ invoice.balance_due|fr_amount }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="brand-panel">
+          <div class="brand-media">
+            {% if supplier.logo_url %}
+            <img class="issuer-logo" src="{{ supplier.logo_url }}" alt="Logo {{ supplier.name or 'Entreprise' }}" />
+            {% else %}
+            <div class="issuer-avatar">{{ (supplier.name or 'P')[:1] }}</div>
+            {% endif %}
+          </div>
+          <div class="issuer-copy-wrap">
+            <div class="issuer-name">{{ supplier.name or '' }}</div>
+            <div class="issuer-copy">
+              {% if supplier.address %}<div>{{ supplier.address }}</div>{% endif %}
+              {% if supplier.email %}<div class="muted-email">{{ supplier.email }}</div>{% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="divider"></div>
+
+        <div class="detail-strip">
+          <div class="detail-item">
+            <div class="detail-label">{% if invoice.type == 'quote' %}Date du devis{% else %}Date d'émission{% endif %}</div>
+            <div class="detail-value">{{ invoice.issue_date|fr_date }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Date de prestation</div>
+            <div class="detail-value">{{ invoice.service_date|fr_date if invoice.service_date else 'Non précisée' }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">{% if invoice.type == 'quote' %}Valable jusqu'au{% else %}Échéance{% endif %}</div>
+            <div class="detail-value">{{ invoice.due_date|fr_date if invoice.due_date else 'À définir' }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">Conditions</div>
+            <div class="detail-value">{{ invoice.payment_terms or 'Non renseignées' }}</div>
+          </div>
+        </div>
+
+        <div class="party-row">
+          <div class="party-card">
+            <div class="party-band">
+              <div class="party-role">Émetteur</div>
+            </div>
+            <div class="party-body">
+              <div class="party-name">{{ supplier.name or '' }}</div>
+              <div class="party-copy">
+                {% if supplier.address %}<div>{{ supplier.address }}</div>{% endif %}
+                {% if supplier.email %}<div class="party-email">{{ supplier.email }}</div>{% endif %}
+              </div>
+              <div class="party-identity">
+                {% if supplier.legal_id %}<div><strong>SIRET</strong>{{ supplier.legal_id }}</div>{% endif %}
+                {% if supplier.vat_number %}
+                <div><strong>N° TVA</strong>{{ supplier.vat_number }}</div>
+                {% elif supplier.vat_exemption_notice %}
+                <div><strong>TVA</strong>{{ supplier.vat_exemption_notice }}</div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          {% set customer_client_type = (customer.client_type|default(customer.type|default('')))|string|lower %}
+          {% set customer_is_individual = customer_client_type in ['individual', 'particulier', 'person', 'consumer', 'b2c'] %}
+          <div class="party-card client">
+            <div class="party-band">
+              <div class="party-role">{% if invoice.type == 'quote' %}Devis pour{% else %}Facturé à{% endif %}</div>
+            </div>
+            <div class="party-body">
+              <div class="party-name">{{ customer.name or '' }}</div>
+              <div class="party-copy">
+                {% if customer.address %}<div>{{ customer.address }}</div>{% endif %}
+                {% if customer.email %}<div class="party-email">{{ customer.email }}</div>{% endif %}
+              </div>
+              {% if not customer_is_individual and (customer.siret or customer.vat_number) %}
+              <div class="party-identity">
+                {% if customer.siret %}<div><strong>SIRET</strong>{{ customer.siret }}</div>{% endif %}
+                {% if customer.vat_number %}<div><strong>N° TVA</strong>{{ customer.vat_number }}</div>{% endif %}
+              </div>
+              {% endif %}
+            </div>
+          </div>
+        </div>
+
+        <div class="section-overline">Détail des prestations</div>
+
+        <div class="table-card">
+          <table>
+            <colgroup>
+              <col class="invoice-col-product">
+              <col class="invoice-col-qty">
+              <col class="invoice-col-unit-price">
+              <col class="invoice-col-vat">
+              <col class="invoice-col-total">
+            </colgroup>
+            <thead>
+              <tr>
+                <th>Produit / service</th>
+                <th class="num">Qté</th>
+                <th class="num">PU HT</th>
+                <th class="num">TVA</th>
+                <th class="num">Montant HT</th>
+              </tr>
+            </thead>
+            <tbody>
+              {% for l in lines %}
+              {% set line_type = (l.line_type|default('item')|string|lower) %}
+              {% if line_type == 'title' or line_type == 'section' %}
+              <tr>
+                <td colspan="5" class="line-section-title">{{ l.product_name }}</td>
+              </tr>
+              {% elif line_type == 'comment' %}
+              <tr>
+                <td colspan="5" class="line-comment-text">{{ l.detail or l.product_name }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <td>
+                  <div class="line-name">{{ l.product_name }}</div>
+                  {% if l.detail %}<div class="line-detail">{{ l.detail }}</div>{% endif %}
+                </td>
+                <td class="num">{{ l.quantity|fr_number }}</td>
+                <td class="num">{{ l.unit_price|fr_amount }}</td>
+                <td class="num">
+                  <span class="vat-chip">{{ l.vat_rate|fr_percent }}</span>
+                  {% set line_vat_reason = line_vat_reason_label(l, supplier, is_english) %}
+                  {% if line_vat_reason %}
+                  <div class="line-detail">{{ line_vat_reason }}</div>
+                  {% endif %}
+                </td>
+                <td class="num"><strong>{{ l.line_total|fr_amount }}</strong></td>
+              </tr>
+              {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="after-table">
+          <div class="aside">
+            <div class="info-card">
+              <div class="info-title">Informations de paiement</div>
+              <div class="info-copy">
+                {% if supplier.iban %}
+                <div><strong>IBAN</strong> {{ supplier.iban }}</div>
+                {% endif %}
+                {% if supplier.bic %}
+                <div><strong>BIC</strong> {{ supplier.bic }}</div>
+                {% endif %}
+                {% if show_delivery_address %}
+                  {% if invoice.delivery_address and (invoice.delivery_address_differs or invoice.delivery_address|trim != (customer.address or '')|trim) %}
+                  <div style="margin-top: 1.6mm;"><strong>Adresse de livraison</strong></div>
+                  <div>{{ invoice.delivery_address }}</div>
+                  {% else %}
+                  <div style="margin-top: 1.6mm;">Adresse de livraison : identique à la facturation</div>
+                  {% endif %}
+                {% endif %}
+                {% if operation_nature_label %}
+                <div style="margin-top: 1.6mm;"><strong>Nature de l'opération</strong> {{ operation_nature_label }}</div>
+                {% endif %}
+              </div>
+            </div>
+
+            {% if (note and show_note) or custom_fields or supplier.legal_mentions or (show_purchase_order_number and invoice.purchase_order_number) %}
+            <div class="info-card">
+              <div class="info-title">Notes et mentions légales</div>
+              <div class="info-copy">
+                {% if show_purchase_order_number and invoice.purchase_order_number %}
+                <div><strong>Bon de commande</strong> {{ invoice.purchase_order_number }}</div>
+                {% endif %}
+                {% if note and show_note %}
+                <div class="multiline" {% if show_purchase_order_number and invoice.purchase_order_number %}style="margin-top: 2.4mm;"{% endif %}>{{ note|multiline_text }}</div>
+                {% endif %}
+                {% if custom_fields %}
+                <div {% if note and show_note %}style="margin-top: 2.4mm;"{% endif %}>
+                  {% for field in custom_fields %}
+                    {% if field.label or field.value %}
+                    <div>{% if field.label %}<strong>{{ field.label }}</strong>{% endif %}{% if field.label and field.value %} : {% endif %}{{ field.value }}</div>
+                    {% endif %}
+                  {% endfor %}
+                </div>
+                {% endif %}
+                {% if supplier.legal_mentions %}
+                <div {% if (note and show_note) or custom_fields %}style="margin-top: 2.4mm;"{% endif %}>{{ supplier.legal_mentions }}</div>
+                {% endif %}
+                {% if supplier.payment_terms_block %}
+                {% set vat_label_bundle = document_vat_labels(supplier, lines, is_english) %}
+                <div style="margin-top: 2.4mm;">
+                  <strong>Escompte</strong> {{ supplier.payment_terms_block.discount_terms or 'Néant' }}<br>
+                  <strong>Pénalités</strong> {{ supplier.payment_terms_block.late_payment_interest or 'Non renseigné' }}<br>
+                  <strong>Indemnité recouvrement</strong> {{ supplier.payment_terms_block.recovery_fee_eur|fr_amount if supplier.payment_terms_block.recovery_fee_eur is not none else '40,00 €' }}<br>
+                  <strong>TVA</strong> {{ vat_label_bundle.legal }}
+                </div>
+                {% endif %}
+              </div>
+            </div>
+            {% endif %}
+          </div>
+
+          <div class="totals-card">
+            <div class="totals-row">
+              <span class="label">Sous-total HT</span>
+              <span class="value">{{ totals.ht|fr_amount }}</span>
+            </div>
+            <div class="totals-row">
+              <span class="label">TVA</span>
+              <span class="value">{{ totals.vat|fr_amount }}</span>
+            </div>
+            <div class="totals-row total">
+              <span class="label">Total TTC</span>
+              <span class="value">{{ totals.ttc|fr_amount }}</span>
+            </div>
+            {% if invoice.balance_due is not none and invoice.type != 'quote' and totals.prepaid %}
+            <div class="totals-row balance">
+              <span class="label">Reste dû</span>
+              <span class="value">{{ invoice.balance_due|fr_amount }}</span>
+            </div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="footer">
+          <div>Document généré via PixFacture.</div>
+          <div class="footer-meta">
+            {{ supplier.name or '' }}
+            {% if supplier.legal_id %} — SIRET {{ supplier.legal_id }}{% endif %}
+            {% if supplier.vat_number %} — TVA {{ supplier.vat_number }}{% endif %}
+          </div>
+        </div>
+      </section>
+    </div>
+  </body>
+</html>

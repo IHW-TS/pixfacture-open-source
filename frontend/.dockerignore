@@ -1,0 +1,47 @@
+# Ignore local build artifacts (recreated inside image)
+node_modules/
+.next/
+.turbo
+dist
+coverage/
+reports/
+test-results/
+playwright-report/
+*.tsbuildinfo
+tmp_*.js
+*.log
+*.pyc
+*.pyo
+.venv
+__pycache__
+.pytest_cache
+*.db
+.DS_Store
+
+# Local configuration and private key material must never enter the Docker
+# build context. The frontend image uses `COPY . .`, so Git ignore rules alone
+# are not a sufficient boundary for untracked developer files.
+.env
+.env.*
+**/.env
+**/.env.*
+*.pem
+*.key
+*.crt
+*.cer
+*.p12
+*.pfx
+*.jks
+*.keystore
+**/*.pem
+**/*.key
+**/*.crt
+**/*.cer
+**/*.p12
+**/*.pfx
+**/*.jks
+**/*.keystore
+secrets/
+**/secrets/
+id_rsa*
+id_ed25519*

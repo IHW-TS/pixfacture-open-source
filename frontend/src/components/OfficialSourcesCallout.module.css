@@ -1,0 +1,15 @@
+.root {
+  margin-top: 12px;
+}
+
+.rootCompact {
+  margin-top: 8px;
+}
+
+.list {
+  margin: 6px 0 0 18px;
+}
+
+.lastUpdated {
+  margin-top: 6px;
+}

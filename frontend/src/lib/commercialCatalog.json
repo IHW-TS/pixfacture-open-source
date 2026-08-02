@@ -1,0 +1,30 @@
+{
+  "subscription_plan_prices_cents": {
+    "starter": {
+      "monthly": 2900,
+      "yearly": 29000
+    },
+    "pro": {
+      "monthly": 5900,
+      "yearly": 59000
+    }
+  },
+  "token_pack_offers": {
+    "100": {
+      "name": "Pack 100 jetons",
+      "unit_amount": 2900
+    },
+    "500": {
+      "name": "Pack 500 jetons",
+      "unit_amount": 12900
+    },
+    "1000": {
+      "name": "Pack 1000 jetons",
+      "unit_amount": 24900
+    },
+    "5000": {
+      "name": "Pack 5000 jetons",
+      "unit_amount": 119900
+    }
+  }
+}

@@ -1,0 +1,53 @@
+[
+  {
+    "name": "OVHcloud",
+    "purpose": "Hebergement applicatif et bases de donnees",
+    "location": "France (UE/EEE)",
+    "website": "https://www.ovhcloud.com",
+    "safeguards": "Contrat fournisseur et mesures de sécurité applicables",
+    "lastUpdated": "2026-07-10"
+  },
+  {
+    "name": "Brevo",
+    "purpose": "Envoi d'emails transactionnels (notifications, factures)",
+    "location": "France / UE",
+    "website": "https://www.brevo.com",
+    "safeguards": "DPA / contrat fournisseur",
+    "lastUpdated": "2026-07-10"
+  },
+  {
+    "name": "Stripe",
+    "purpose": "Paiement en ligne et gestion des abonnements",
+    "location": "Irlande (UE) + Etats-Unis",
+    "website": "https://stripe.com",
+    "safeguards": "SCC (clauses contractuelles types)",
+    "lastUpdated": "2026-07-10"
+  },
+  {
+    "name": "Sentry",
+    "purpose": "Monitoring applicatif et gestion des erreurs",
+    "location": "Etats-Unis (transfert possible)",
+    "website": "https://sentry.io",
+    "safeguards": "SCC (clauses contractuelles types)",
+    "notes": "Optionnel selon activation du monitoring applicatif sur l'instance",
+    "lastUpdated": "2026-07-10"
+  },
+  {
+    "name": "Seqino, connecteur PA partenaire",
+    "purpose": "Transmission réglementaire via plateforme agréée selon contrat, mandat et statut officiel applicable",
+    "location": "France",
+    "website": "https://www.seqino.com",
+    "relationship": "Sous-traitant ultérieur selon activation et contrat applicable",
+    "notes": "Optionnel, utilisé lorsque le connecteur Pro est actif selon mandat, contrat et configuration",
+    "lastUpdated": "2026-07-10"
+  },
+  {
+    "name": "AIFE — Chorus Pro via PISTE",
+    "purpose": "Dépôt et suivi des factures destinées au secteur public (B2G) lorsque le canal Chorus est activé",
+    "location": "France (administration française)",
+    "website": "https://communaute.chorus-pro.gouv.fr/",
+    "relationship": "Destinataire et opérateur public ; qualification distincte d’un sous-traitant selon le flux",
+    "notes": "Optionnel, uniquement pour le canal B2G configuré ; soumis aux conditions Chorus Pro et PISTE",
+    "lastUpdated": "2026-07-10"
+  }
+]

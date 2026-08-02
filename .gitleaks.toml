@@ -1,0 +1,47 @@
+title = "Repo gitleaks configuration"
+
+[extend]
+useDefault = true
+
+[[rules]]
+id = "sensitive-env-vars"
+description = "Detects sensitive env vars in configuration files."
+regex = '''(?im)^[ \t]*["']?(?:STRIPE_SECRET_KEY|STRIPE_WEBHOOK_SECRET|SMTP_PASSWORD|PISTE_CLIENT_SECRET)[ \t]*=[ \t]*([^ \t\r\n#"',\\]+)'''
+secretGroup = 1
+keywords = [
+  "STRIPE_SECRET_KEY",
+  "STRIPE_WEBHOOK_SECRET",
+  "SMTP_PASSWORD",
+  "PISTE_CLIENT_SECRET",
+]
+tags = ["key", "env"]
+
+[rules.allowlist]
+regexes = [
+  '''(?i)^(CHANGE_ME|CHANGE_ME_[A-Z0-9_]+|YOUR_[A-Z0-9_]+|legacy-piste-secret|sk_test_card_checkout|whsec_example)$''',
+]
+
+[[rules]]
+id = "stripe-secret-prefix"
+description = "Detects Stripe API keys and webhook secrets."
+regex = '''(?i)\b((?:sk|pk)_(?:live|test)_[A-Za-z0-9_]+|whsec_[A-Za-z0-9_]+)\b'''
+tags = ["key", "stripe"]
+
+[rules.allowlist]
+regexes = [
+  '''(?i)\b(?:sk_live_example|sk_test_card_checkout|pk_test_CHANGE_ME|whsec_example)\b''',
+]
+
+[allowlist]
+description = "Generated caches ignored by Git and rebuilt from tracked sources."
+paths = [
+  '''(^|/)(?:\.next|__pycache__)(?:/|$)''',
+  '''\.pyc$''',
+]
+
+[[rules]]
+id = "traefik-acme-json"
+description = "Detects Traefik ACME storage files (must stay out of repo)."
+path = '''(?i)traefik/acme\.json$'''
+regex = '''(?s).+'''
+tags = ["traefik", "acme", "secret"]

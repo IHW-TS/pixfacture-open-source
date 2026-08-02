@@ -1,0 +1,1731 @@
+<!doctype html>
+<html lang="fr">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>{% if invoice.type == 'credit_note' %}Avoir{% elif invoice.type == 'quote' %}Devis{% else %}Facture{% endif %} {{ invoice.number or '' }}</title>
+    <style>
+      @page {
+        size: A4;
+        margin: 0 0 38px 0;
+        @bottom-right {
+          content: "Page " counter(page) " / " counter(pages);
+          color: var(--pdf-light-text);
+          font-family: "Inter", "InvoiceDocument", "DejaVu Sans", Arial, sans-serif;
+          font-size: var(--pdf-font-md);
+          font-weight: 400;
+          padding: 2px 26px 0 0;
+          vertical-align: top;
+        }
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/api/static/fonts/Inter-400.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 400;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/api/static/fonts/Inter-500.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 500;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/api/static/fonts/Inter-600.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 600;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/api/static/fonts/Inter-700.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 700;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/api/static/fonts/Inter-800.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 800;
+      }
+
+      @font-face {
+        font-family: "Inter";
+        src: url("/api/static/fonts/Inter-900.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 900;
+      }
+
+      @font-face {
+        font-family: "InvoiceDocument";
+        src: url("/api/static/fonts/InvoiceSans-Regular.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 400;
+      }
+
+      @font-face {
+        font-family: "InvoiceDocument";
+        src: url("/api/static/fonts/InvoiceSans-Regular.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 500;
+      }
+
+      @font-face {
+        font-family: "InvoiceDocument";
+        src: url("/api/static/fonts/InvoiceSans-Regular.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 600;
+      }
+
+      @font-face {
+        font-family: "InvoiceDocument";
+        src: url("/api/static/fonts/InvoiceSans-Bold.ttf") format("truetype");
+        font-style: normal;
+        font-weight: 700;
+      }
+
+      :root {
+        --pdf-text: #0f172a;
+        --pdf-muted-text: #64748b;
+        --pdf-light-text: #94a3b8;
+        --pdf-icon: #a8b7cc;
+        --pdf-border: #d8e2f0;
+        --pdf-header-bg: #eff6ff;
+        --pdf-blue: #1d4ed8;
+        --pdf-orange: #c2410c;
+        --ink: var(--pdf-text);
+        --text: var(--pdf-muted-text);
+        --muted: var(--pdf-light-text);
+        --line: var(--pdf-border);
+        --soft: #f8fafc;
+        --soft-2: #f8fbff;
+        --soft-3: var(--pdf-header-bg);
+        --accent: #2563eb;
+        --accent-soft: #dbeafe;
+        --accent-text: var(--pdf-blue);
+        --success: #178548;
+        --success-bg: #eafaf0;
+        --success-line: #cdeed9;
+        --warn: #9a5800;
+        --warn-bg: #fff7e6;
+        --warn-line: #f5d9a6;
+        --danger: #b42318;
+        --danger-bg: #fff1f1;
+        --danger-line: #f4cccc;
+        --pdf-font-md: 12px;
+        --pdf-weight-regular: 400;
+        --pdf-weight-medium: 500;
+        --pdf-weight-semibold: 600;
+        --pdf-weight-bold: 700;
+        --document-line: 1.45;
+      }
+
+      body.theme-graphite {
+        --ink: #192536;
+        --text: #536274;
+        --muted: #7a8797;
+        --line: #d7e0e9;
+        --soft: #f8fafc;
+        --soft-2: #f3f6f9;
+        --soft-3: #edf2f7;
+        --accent: #365ea8;
+        --accent-soft: #dde7f6;
+        --accent-text: #365ea8;
+      }
+
+      body.theme-ivory {
+        --ink: #3b3123;
+        --text: #685a4d;
+        --muted: #8a7c70;
+        --line: #e7ddcf;
+        --soft: #fdfaf5;
+        --soft-2: #faf5ed;
+        --soft-3: #f5ede2;
+        --accent: #9d6b1b;
+        --accent-soft: #f0e0c2;
+        --accent-text: #9d6b1b;
+      }
+
+      body.document-quote {
+        --accent: #7c3aed;
+        --accent-soft: #ede9fe;
+        --accent-text: #6d28d9;
+        --soft-3: #f5f3ff;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      body {
+        margin: 0;
+        font-family: "Inter", "InvoiceDocument", "DejaVu Sans", Arial, sans-serif;
+        font-size: var(--pdf-font-md);
+        line-height: var(--document-line);
+        color: var(--text);
+        background: #fff;
+      }
+
+      h1, h2, h3, p {
+        margin: 0;
+      }
+
+      .page {
+        width: 794px;
+        max-width: 100%;
+        margin: 0 auto;
+      }
+
+      .document-shell {
+        overflow: visible;
+        border: 0;
+        border-radius: 0;
+        background: #fff;
+      }
+
+      .top-rule {
+        height: 4px;
+        background: linear-gradient(90deg, #2563eb 0%, #4f46e5 45%, #7c3aed 72%, #0d9488 100%);
+      }
+
+      body.document-quote .top-rule {
+        background: linear-gradient(90deg, #7c3aed 0%, #6d28d9 62%, #a855f7 100%);
+      }
+
+      @media print {
+        .top-rule {
+          position: fixed;
+          top: 0;
+          right: 0;
+          left: 0;
+          z-index: 20;
+        }
+      }
+
+      .document-body {
+        padding: 22px 32px 34px;
+      }
+
+      .detail-strip,
+      .party-grid,
+      .support-grid {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        page-break-inside: avoid;
+      }
+
+      .party-col,
+      .support-col {
+        display: table-cell;
+        vertical-align: top;
+      }
+
+      .brand-row {
+        position: relative;
+        min-height: 88px;
+        padding-right: 320px;
+        page-break-inside: avoid;
+      }
+
+      .brand-left {
+        position: relative;
+        z-index: 1;
+        display: block;
+      }
+
+      .brand-right {
+        position: absolute;
+        top: 0;
+        right: 0;
+        z-index: 1;
+        width: 300px;
+        text-align: right;
+      }
+
+      .brand-mark-wrap {
+        width: 190px;
+      }
+
+      .brand-mark-wrap.brand-mark-wrap-logo {
+        width: 190px;
+      }
+
+      .brand-mark {
+        width: 24mm;
+        height: 24mm;
+        border-radius: 12px;
+        background: linear-gradient(135deg, #1d4ed8, #4f46e5);
+        color: #fff;
+        text-align: center;
+        line-height: 24mm;
+        font-size: var(--pdf-font-md);
+        font-weight: 800;
+      }
+
+      .brand-mark.brand-mark-logo {
+        width: 190px;
+        height: 88px;
+        padding: 16px;
+        border-radius: 12px;
+        border: 1px solid var(--line);
+        background: #fff;
+        line-height: normal;
+      }
+
+      .brand-mark.brand-mark-logo img {
+        display: block;
+        width: 100%;
+        height: 100%;
+        object-fit: contain;
+      }
+
+      .brand-name {
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        letter-spacing: 0;
+        color: var(--ink);
+        line-height: 1.15;
+      }
+
+      .brand-copy-lines {
+        margin-top: 1.2mm;
+        font-size: var(--pdf-font-md);
+        line-height: 1.55;
+      }
+
+      .brand-copy-lines div {
+        margin-top: 0.8mm;
+      }
+
+      .address-block {
+        white-space: pre-line;
+      }
+
+      .brand-link {
+        color: var(--accent-text);
+      }
+
+      .doc-kicker {
+        font-size: var(--pdf-font-md);
+        font-weight: 600;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--muted);
+      }
+
+      .doc-number {
+        margin-top: 4px;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-bold);
+        letter-spacing: 0;
+        color: var(--accent-text);
+      }
+
+      .status-badge {
+        display: inline-block;
+        margin-top: 10px;
+        padding: 6px 12px;
+        border-radius: 999px;
+        border: 1px solid var(--success-line);
+        background: var(--success-bg);
+        color: var(--success);
+        font-size: var(--pdf-font-md);
+        font-weight: 600;
+        line-height: 1;
+        white-space: nowrap;
+      }
+
+      .status-issued,
+      .status-sent,
+      .status-partial {
+        border-color: var(--warn-line);
+        background: var(--warn-bg);
+        color: var(--warn);
+      }
+
+      .status-overdue,
+      .status-canceled,
+      .status-refused {
+        border-color: var(--danger-line);
+        background: var(--danger-bg);
+        color: var(--danger);
+      }
+
+      .status-draft {
+        border-color: var(--line);
+        background: #f8fafc;
+        color: var(--muted);
+      }
+
+      .status-accepted,
+      .status-invoiced {
+        border-color: var(--accent-soft);
+        background: var(--soft);
+        color: var(--accent-text);
+      }
+
+      .section-divider {
+        margin: 14px 0 18px;
+        height: 1px;
+        background: linear-gradient(90deg, #bfdbfe 0%, #e2e8f0 55%, transparent 100%);
+      }
+
+      body.document-quote .section-divider {
+        background: linear-gradient(90deg, #ddd6fe 0%, #e2e8f0 55%, transparent 100%);
+      }
+
+      .document-title-box {
+        margin-bottom: 18px;
+        padding: 11px 14px;
+        border: 1px solid var(--line);
+        border-radius: 8px;
+        background: #fff;
+        color: var(--ink);
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        page-break-inside: avoid;
+      }
+
+      .document-title-before-lines {
+        margin-top: 28px;
+        margin-bottom: 12px;
+      }
+
+      .document-title-before-lines + .table-wrap {
+        margin-top: 12px;
+      }
+
+      .detail-strip {
+        width: 100%;
+        margin-right: 0;
+        margin-left: 0;
+        border: 1px solid #dbe3ef;
+        border-radius: 12px;
+        overflow: hidden;
+        background: #f8fbff;
+      }
+
+      .detail-item {
+        display: table-cell;
+        width: 25%;
+        height: 52px;
+        padding: 7px 10px;
+        border-left: 1px solid #dbe3ef;
+        vertical-align: middle;
+      }
+
+      .detail-item:first-child {
+        border-left: none;
+      }
+
+      .detail-label {
+        margin-bottom: 4px;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-medium);
+        letter-spacing: 0;
+        text-transform: none;
+        color: #94a3b8;
+      }
+
+      .detail-value {
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        line-height: 1.2;
+        white-space: normal;
+        overflow-wrap: anywhere;
+        color: var(--ink);
+      }
+
+      .party-grid {
+        margin-top: 18px;
+      }
+
+      .party-col {
+        width: 45%;
+      }
+
+      .party-sep {
+        display: table-cell;
+        width: 10%;
+        vertical-align: middle;
+        text-align: center;
+        background: none;
+      }
+
+      .party-arrow {
+        display: inline-block;
+        width: 34px;
+        height: 34px;
+        border: 1px solid #dbe4ef;
+        border-radius: 999px;
+        background: #fff;
+        color: #c7d2e0;
+        font-size: var(--pdf-font-md);
+        font-weight: 600;
+        line-height: 30px;
+        text-align: center;
+      }
+
+      .party-card {
+        border: 1px solid #e2e8f0;
+        border-radius: 14px;
+        overflow: hidden;
+        background: #fff;
+      }
+
+      .party-card.party-card-client {
+        border-color: #bfdbfe;
+        background: #f8fbff;
+      }
+
+      body.document-quote .party-card.party-card-client {
+        border-color: #ddd6fe;
+        background: #faf5ff;
+      }
+
+      .party-band {
+        height: 31px;
+        padding: 6px 15px;
+        border-bottom: 1px solid #e2e8f0;
+        background: linear-gradient(135deg, #f8fafc, #f1f5f9);
+      }
+
+      .party-card.party-card-client .party-band {
+        border-bottom-color: #bfdbfe;
+        background: linear-gradient(135deg, #eff6ff, #dbeafe);
+      }
+
+      body.document-quote .party-card.party-card-client .party-band {
+        border-bottom-color: #ddd6fe;
+        background: #f3e8ff;
+      }
+
+      .party-role {
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        letter-spacing: 0;
+        text-transform: none;
+        color: #94a3b8;
+      }
+
+      .party-card.party-card-client .party-role {
+        color: #94a3b8;
+      }
+
+      .party-body {
+        padding: 12px 14px;
+        min-height: 168px;
+      }
+
+      .party-name {
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        overflow-wrap: anywhere;
+        color: var(--ink);
+      }
+
+      .party-copy {
+        margin-top: 8px;
+        font-size: var(--pdf-font-md);
+        line-height: 1.55;
+        color: #64748b;
+      }
+
+      .party-line {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        margin-top: 4px;
+      }
+
+      .party-icon-cell,
+      .party-line-text,
+      .party-identity-icon-cell,
+      .party-identity-list {
+        display: table-cell;
+        vertical-align: top;
+      }
+
+      .party-icon-cell,
+      .party-identity-icon-cell {
+        width: 28px;
+        color: var(--pdf-icon);
+      }
+
+      .party-icon {
+        display: inline-block;
+        width: 13px;
+        height: 13px;
+        margin-top: 2px;
+        color: var(--pdf-icon);
+      }
+
+      .party-link {
+        color: var(--accent-text);
+        overflow-wrap: anywhere;
+      }
+
+      .party-identity {
+        margin-top: 8px;
+        padding-top: 8px;
+        border-top: 0.5px dashed rgba(226, 232, 240, 0.8);
+        font-size: var(--pdf-font-md);
+        line-height: 1.38;
+      }
+
+      .party-identity-wrap {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+      }
+
+      .party-card.party-card-client .party-identity {
+        border-top-color: #bfdbfe;
+      }
+
+      .party-identity-row {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        margin-top: 1px;
+      }
+
+      .party-identity-row strong,
+      .party-identity-row span {
+        display: table-cell;
+        vertical-align: middle;
+      }
+
+      .party-identity strong {
+        width: 66px;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-medium);
+        letter-spacing: 0;
+        text-transform: none;
+        color: #94a3b8;
+      }
+
+      .party-identity-row span {
+        font-size: var(--pdf-font-md);
+        font-family: inherit;
+        color: #334155;
+        font-weight: var(--pdf-weight-semibold);
+        overflow-wrap: anywhere;
+      }
+
+      .section-label {
+        display: none;
+      }
+
+      .table-wrap {
+        border: 1px solid var(--line);
+        border-radius: 0;
+        overflow: visible;
+        background: #fff;
+        page-break-inside: auto;
+        margin-top: 20px;
+      }
+
+      table.items,
+      table.totals-table {
+        width: 100%;
+        border-collapse: collapse;
+      }
+
+      table.items {
+        table-layout: fixed;
+        font-family: inherit;
+        font-size: var(--pdf-font-md);
+      }
+
+      table.items col.item-col-index {
+        width: 4.2%;
+      }
+
+      table.items col.item-col-reference {
+        width: 11.5%;
+      }
+
+      table.items col.item-col-product {
+        width: auto;
+      }
+
+      table.items col.item-col-qty {
+        width: 11%;
+      }
+
+      table.items col.item-col-unit {
+        width: 7%;
+      }
+
+      table.items col.item-col-unit-price {
+        width: 11%;
+      }
+
+      table.items col.item-col-vat {
+        width: 11%;
+      }
+
+      table.items col.item-col-discount {
+        width: 9%;
+      }
+
+      table.items col.item-col-total {
+        width: 11%;
+      }
+
+      table.items col.item-col-discounted-total {
+        width: 12%;
+      }
+
+      table.items.items-with-discount col.item-col-index {
+        width: 4%;
+      }
+
+      table.items.items-with-discount col.item-col-reference {
+        width: 9.5%;
+      }
+
+      table.items.items-with-discount col.item-col-qty {
+        width: 7%;
+      }
+
+      table.items.items-with-discount col.item-col-unit {
+        width: 6%;
+      }
+
+      table.items.items-with-discount col.item-col-unit-price {
+        width: 10%;
+      }
+
+      table.items.items-with-discount col.item-col-vat,
+      table.items.items-with-discount col.item-col-discount {
+        width: 8.8%;
+      }
+
+      table.items.items-with-discount col.item-col-total {
+        width: 11%;
+      }
+
+      table.items.items-with-discount col.item-col-discounted-total {
+        width: 13%;
+      }
+
+      table.items thead th {
+        padding: 9px 8px;
+        border-bottom: 1px solid #bfdbfe;
+        text-align: left;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        line-height: 1.2;
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--ink);
+        background: #eff6ff;
+        overflow-wrap: normal;
+      }
+
+      table.items thead th.index-cell,
+      table.items tbody td.index-cell {
+        width: 48px;
+        min-width: 48px;
+        padding-left: 8px;
+        padding-right: 8px;
+        text-align: center;
+        white-space: nowrap;
+      }
+
+      table.items thead th.num {
+        text-align: right;
+      }
+
+      table.items tbody td.num {
+        overflow: visible;
+        padding-left: 6px;
+        padding-right: 6px;
+        text-align: right;
+        white-space: normal;
+        font-size: var(--pdf-font-md);
+        line-height: 1.25;
+        font-variant-numeric: tabular-nums;
+      }
+
+      table.items tbody td.num strong {
+        display: inline-block;
+        max-width: 100%;
+        overflow: visible;
+        vertical-align: bottom;
+        white-space: normal;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-bold);
+      }
+
+      .amount-fit {
+        display: inline-block;
+        max-width: 100%;
+        vertical-align: bottom;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        word-break: keep-all;
+        text-align: right;
+        line-height: 1.12;
+        font-variant-numeric: tabular-nums;
+      }
+
+      table.items .amount-long {
+        letter-spacing: -0.01em;
+      }
+
+      table.items .amount-very-long {
+        letter-spacing: -0.04em;
+      }
+
+      table.items thead th.discount-col,
+      table.items tbody td.discount-col {
+        color: var(--pdf-orange);
+      }
+
+      table.items thead th.reference-cell,
+      table.items tbody td.reference-cell {
+        border-right: 1px solid #dbe3ef;
+      }
+
+      table.items tbody td.discount-col strong {
+        color: var(--pdf-orange);
+      }
+
+      table.items tbody td {
+        padding: 10px 8px;
+        border-bottom: 1px solid #edf2f7;
+        vertical-align: middle;
+        font-size: var(--pdf-font-md);
+      }
+
+      table.items tbody tr {
+        page-break-inside: avoid;
+        break-inside: avoid;
+      }
+
+      table.items tbody tr:last-child td {
+        border-bottom: none;
+      }
+
+      .line-index {
+        display: inline-block;
+        min-width: 2ch;
+        border: 0;
+        background: transparent;
+        color: var(--accent-text);
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-bold);
+        line-height: 1;
+        text-align: center;
+        white-space: nowrap;
+        overflow-wrap: normal;
+        font-variant-numeric: tabular-nums;
+      }
+
+      .line-reference {
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        color: var(--muted);
+        overflow-wrap: anywhere;
+      }
+
+      .line-name {
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        color: var(--ink);
+        line-height: 1.2;
+        overflow-wrap: anywhere;
+      }
+
+      .line-detail {
+        margin-top: 4px;
+        font-size: var(--pdf-font-md);
+        color: var(--muted);
+        line-height: 1.35;
+        overflow-wrap: anywhere;
+      }
+
+      .line-section-title {
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        color: var(--accent-text);
+        background: #eff6ff;
+        letter-spacing: 0;
+      }
+
+      .line-comment-text {
+        white-space: pre-line;
+        font-size: var(--pdf-font-md);
+        color: var(--muted);
+        line-height: 1.45;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+        max-width: 100%;
+      }
+
+      .totals-wrap {
+        width: 258px;
+        margin-top: 0;
+        margin-left: auto;
+        page-break-inside: avoid;
+      }
+
+      .totals-box {
+        border: 1px solid var(--line);
+        border-top: none;
+        border-radius: 0 0 9px 9px;
+        overflow: hidden;
+        background: var(--soft);
+      }
+
+      table.totals-table th,
+      table.totals-table td {
+        padding: 6px 11px;
+        border-top: 0.5px solid rgba(219, 228, 239, 0.68);
+      }
+
+      table.totals-table tr:first-child th,
+      table.totals-table tr:first-child td {
+        border-top: none;
+      }
+
+      table.totals-table th {
+        text-align: left;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        color: #64748b;
+      }
+
+      table.totals-table td {
+        text-align: right;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-bold);
+        color: var(--ink);
+        white-space: nowrap;
+      }
+
+      table.totals-table tr.total th,
+      table.totals-table tr.total td {
+        background: #eef2ff;
+        color: #4f46e5;
+        font-size: var(--pdf-font-md);
+      }
+
+      table.totals-table tr.total th {
+        border-left: 2px solid var(--accent);
+      }
+
+      table.totals-table tr.requested-advance th,
+      table.totals-table tr.requested-advance td {
+        color: var(--accent-text);
+      }
+
+      table.totals-table tr.balance th,
+      table.totals-table tr.balance td {
+        background: var(--success-bg);
+        color: var(--success);
+      }
+
+      .vat-badge {
+        display: inline;
+        padding: 0;
+        border: 0;
+        background: transparent;
+        color: inherit;
+        font-size: inherit;
+        font-weight: var(--pdf-weight-semibold);
+        font-variant-numeric: tabular-nums;
+      }
+
+      .support-grid {
+        margin-top: 18px;
+        page-break-inside: avoid;
+      }
+
+      .support-col {
+        width: 50%;
+      }
+
+      .support-col:first-child {
+        padding-right: 8px;
+      }
+
+      .support-col:last-child {
+        padding-left: 8px;
+      }
+
+      .support-grid-payment-only .support-col {
+        width: 100%;
+      }
+
+      .support-grid-payment-only .support-col:first-child {
+        padding-right: 0;
+      }
+
+      .support-card {
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #f8fbff;
+        padding: 8px 10px 9px;
+      }
+
+      .support-title {
+        margin-bottom: 6px;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        letter-spacing: 0;
+        text-transform: none;
+        color: var(--accent-text);
+      }
+
+      .support-subtitle {
+        margin-top: 2.5mm;
+        margin-bottom: 1.2mm;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        color: var(--ink);
+      }
+
+      .support-copy {
+        margin-top: 6px;
+        font-size: var(--pdf-font-md);
+        line-height: 1.35;
+      }
+
+      .support-row {
+        display: table;
+        width: 100%;
+        table-layout: fixed;
+        margin-top: 0;
+        padding: 3px 0;
+        border-top: 1px solid #e6edf7;
+      }
+
+      .support-row:first-child {
+        border-top: none;
+      }
+
+      .support-row .label,
+      .support-row .value {
+        display: table-cell;
+        vertical-align: top;
+      }
+
+      .support-row .label {
+        width: 104px;
+        padding-right: 8px;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        color: var(--muted);
+        overflow-wrap: normal;
+      }
+
+      .support-card-payment .support-row .label {
+        width: 82px;
+      }
+
+      .support-row .value {
+        padding-left: 4px;
+        color: #334155;
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        overflow-wrap: anywhere;
+      }
+
+      .bank-value {
+        font-family: inherit;
+        font-weight: var(--pdf-weight-bold);
+        overflow-wrap: anywhere;
+      }
+
+      .label {
+        color: var(--muted);
+      }
+
+      .note-box {
+        margin-top: 10px;
+        padding: 9px 12px;
+        border: 1px solid var(--line);
+        border-radius: 12px;
+        background: #fff;
+        page-break-inside: avoid;
+      }
+
+      .note-title {
+        font-size: var(--pdf-font-md);
+        font-weight: var(--pdf-weight-semibold);
+        color: var(--accent-text);
+      }
+
+      .note-copy {
+        white-space: pre-line;
+        overflow-wrap: anywhere;
+        word-break: normal;
+        color: var(--ink);
+      }
+
+      .legal-print {
+        margin-top: 8px;
+        padding: 8px 10px;
+        page-break-inside: auto;
+        break-inside: auto;
+      }
+
+      .legal-print .note-copy {
+        color: #334155;
+        font-size: var(--pdf-font-md);
+        line-height: 1.38;
+        white-space: pre-wrap;
+      }
+
+      .trace-box {
+        margin-top: 6mm;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        background: var(--soft);
+        padding: 4mm 4.5mm;
+        page-break-inside: avoid;
+      }
+
+      .footer {
+        display: none;
+      }
+
+    </style>
+  </head>
+  {% set template_key = template_key or 'classic' %}
+  {% set template_options = template_options or {} %}
+  {% set document_language = (template_options.get('document_language', 'fr') or 'fr')|lower %}
+  {% set is_english = document_language[:2] == 'en' %}
+  {% set show_delivery_address = template_options.get('show_delivery_address', true) %}
+  {% set show_purchase_order_number = template_options.get('show_purchase_order_number', true) %}
+  {% set show_note = template_options.get('show_note', true) %}
+  {% set show_supplier_email = template_options.get('show_supplier_email', true) %}
+  {% set show_supplier_phone = template_options.get('show_supplier_phone', true) %}
+  {% set document_title = template_options.get('document_title') %}
+  {% set custom_fields = template_options.get('custom_fields', []) %}
+  {% set raw_line_columns = template_options.get('line_columns', {}) %}
+  {% if raw_line_columns is mapping %}
+    {% set line_columns = raw_line_columns %}
+  {% else %}
+    {% set line_columns = {} %}
+  {% endif %}
+  {% set show_line_number_column = line_columns.get('lineNumber', false) %}
+  {% set show_line_reference_column = line_columns.get('reference', false) %}
+  {% set show_line_quantity_column = line_columns.get('quantity', true) %}
+  {% set show_line_unit_column = line_columns.get('unit', false) %}
+  {% set show_line_unit_price_column = line_columns.get('unitPrice', true) %}
+  {% set show_line_vat_column = line_columns.get('vat', true) %}
+  {% set has_discount_display = totals.allowance|default(0) %}
+  {% set show_line_discount_column = line_columns.get('discount', false) %}
+  {% set show_line_base_total_column = line_columns.get('baseTotal', true) %}
+  {% set show_line_discounted_total_column = line_columns.get('discountedTotal', false) %}
+  {% set line_ns = namespace(colspan=1) %}
+  {% if show_line_number_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if show_line_reference_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if show_line_quantity_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if show_line_unit_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if show_line_unit_price_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if show_line_vat_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if show_line_discount_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if show_line_base_total_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if show_line_discounted_total_column %}{% set line_ns.colspan = line_ns.colspan + 1 %}{% endif %}
+  {% if is_english %}
+    {% set doc_title = 'Invoice' %}
+    {% if invoice.type == 'credit_note' %}
+      {% set doc_title = 'Credit note' %}
+    {% elif invoice.type == 'quote' %}
+      {% set doc_title = 'Quote' %}
+    {% endif %}
+  {% else %}
+    {% set doc_title = 'Facture' %}
+    {% if invoice.type == 'credit_note' %}
+      {% set doc_title = 'Avoir' %}
+    {% elif invoice.type == 'quote' %}
+      {% set doc_title = 'Devis' %}
+    {% endif %}
+  {% endif %}
+  {% set status = (invoice.status or '')|lower %}
+  {% set status_label = None %}
+  {% if status == 'paid' %}
+    {% set status_label = 'Paid' if is_english else 'Payée' %}
+  {% elif status in ['issued', 'sent'] %}
+    {% if is_english %}
+      {% set status_label = 'Issued' if status == 'issued' else 'Sent' %}
+    {% elif invoice.type == 'quote' %}
+      {% set status_label = 'Émis' if status == 'issued' else 'Envoyé' %}
+    {% else %}
+      {% set status_label = 'Émise' if status == 'issued' else 'Envoyée' %}
+    {% endif %}
+  {% elif status == 'partial' %}
+    {% set status_label = 'Partially paid' if is_english else 'Partiellement réglée' %}
+  {% elif status == 'overdue' %}
+    {% set status_label = 'Overdue' if is_english else 'En retard' %}
+  {% elif status == 'canceled' %}
+    {% set status_label = 'Canceled' if is_english else 'Annulée' %}
+  {% elif status == 'draft' %}
+    {% set status_label = 'Draft' if is_english else 'Brouillon' %}
+  {% elif status == 'accepted' %}
+    {% set status_label = 'Accepted' if is_english else 'Accepté' %}
+  {% elif status == 'refused' %}
+    {% set status_label = 'Rejected' if is_english else 'Refusé' %}
+  {% elif status == 'invoiced' %}
+    {% set status_label = 'Invoiced' if is_english else 'Facturé' %}
+  {% endif %}
+  {% set operation_nature_raw = invoice.operation_nature %}
+  {% set operation_nature_label = None %}
+  {% if operation_nature_raw %}
+    {% set operation_nature_value = operation_nature_raw|lower %}
+    {% if operation_nature_value == 'goods' %}
+      {% set operation_nature_label = 'Goods' if is_english else 'Biens' %}
+    {% elif operation_nature_value == 'services' %}
+      {% set operation_nature_label = 'Services' %}
+    {% elif operation_nature_value == 'mixed' %}
+      {% set operation_nature_label = 'Goods and services' if is_english else 'Biens et services' %}
+    {% else %}
+      {% set operation_nature_label = operation_nature_raw %}
+    {% endif %}
+  {% endif %}
+  {% set payment_methods_raw = template_options.get('payment_methods') %}
+  {% if payment_methods_raw is string %}
+    {% set payment_method_values = [payment_methods_raw] %}
+  {% elif payment_methods_raw and payment_methods_raw|length > 0 %}
+    {% set payment_method_values = payment_methods_raw %}
+  {% else %}
+    {% set payment_method_values = [template_options.get('payment_method') or customer.payment_method_default or 'bank_transfer'] %}
+  {% endif %}
+  {% set payment_method_ns = namespace(labels=[]) %}
+  {% for method_raw in payment_method_values %}
+    {% set payment_method_raw = (method_raw or '')|lower %}
+    {% if payment_method_raw in ['card', 'carte', 'cb'] %}
+      {% set payment_method_item = 'Card payment' if is_english else 'Carte bancaire' %}
+    {% elif payment_method_raw in ['cash', 'espece', 'especes', 'espèce', 'espèces'] %}
+      {% set payment_method_item = 'Cash' if is_english else 'Espèce' %}
+    {% elif payment_method_raw in ['cheque', 'chèque'] %}
+      {% set payment_method_item = 'Cheque' if is_english else 'Chèque' %}
+    {% elif payment_method_raw in ['direct_debit', 'prelevement', 'prélèvement'] %}
+      {% set payment_method_item = 'Direct debit' if is_english else 'Prélèvement bancaire' %}
+    {% elif payment_method_raw in ['cesu'] %}
+      {% set payment_method_item = 'CESU' %}
+    {% elif payment_method_raw in ['urssaf_aici'] %}
+      {% set payment_method_item = 'Urssaf debit' if is_english else 'Prélèvement Urssaf' %}
+    {% elif payment_method_raw in ['payment_app'] %}
+      {% set payment_method_item = 'Payment app' if is_english else 'Application de paiement' %}
+    {% else %}
+      {% set payment_method_item = 'Bank transfer' if is_english else 'Virement bancaire' %}
+    {% endif %}
+    {% if payment_method_item not in payment_method_ns.labels %}
+      {% set _ = payment_method_ns.labels.append(payment_method_item) %}
+    {% endif %}
+  {% endfor %}
+  {% set payment_method_label = payment_method_ns.labels|natural_join(is_english) %}
+  {% if not payment_method_label %}
+    {% set payment_method_label = 'Bank transfer' if is_english else 'Virement bancaire' %}
+  {% endif %}
+  {% set supplier_vat_regime = (supplier.vat_regime or '')|lower %}
+  {% set supplier_vat_exemption_notice = (supplier.vat_exemption_notice or '')|trim %}
+  {% set supplier_vat_number = (supplier.vat_number or '')|trim %}
+  {% set vat_label_bundle = document_vat_labels(supplier, lines, is_english) %}
+  {% set vat_display_label = vat_label_bundle.display %}
+  {% set vat_legal_label = vat_label_bundle.legal %}
+  {% set facturx_profile_value = (facturx_profile or invoice.facturx_profile or 'en16931')|lower %}
+  {% if facturx_profile_value == 'en16931' %}
+    {% set facturx_profile_label = 'EN16931 (recommended)' if is_english else 'EN16931 (recommandé)' %}
+  {% elif facturx_profile_value == 'extended-ctc-fr' %}
+    {% set facturx_profile_label = 'Extended CTC FR' %}
+  {% elif facturx_profile_value == 'extended' %}
+    {% set facturx_profile_label = 'Extended' %}
+  {% elif facturx_profile_value == 'basic' %}
+    {% set facturx_profile_label = 'Basic' %}
+  {% elif facturx_profile_value == 'minimum' %}
+    {% set facturx_profile_label = 'Minimum' %}
+  {% else %}
+    {% set facturx_profile_label = facturx_profile_value|upper %}
+  {% endif %}
+  {% set recovery_fee = supplier.payment_terms_block.recovery_fee_eur if supplier.payment_terms_block and supplier.payment_terms_block.recovery_fee_eur is not none else 40 %}
+  {% set penalties_label = supplier.payment_terms_block.late_payment_interest if supplier.payment_terms_block and supplier.payment_terms_block.late_payment_interest else '10%' %}
+  {% set legal_footer_text = (template_options.get('legal_footer_text') or '')|trim %}
+  {% set legal_terms_default = template_options.get('legal_terms_default', true) %}
+  {% set legal_mentions_extra = '' %}
+  {% if not vat_legal_label %}
+    {% set legal_vat_sentence = '' %}
+  {% elif vat_legal_label[-1:] in ['.', '!', '?'] %}
+    {% set legal_vat_sentence = vat_legal_label %}
+  {% else %}
+    {% set legal_vat_sentence = vat_legal_label ~ '.' %}
+  {% endif %}
+  {% set normal_vat_labels = ['TVA sur les débits', 'TVA sur les debits', 'TVA sur les encaissements', "TVA acquittée d'après les débits", "TVA acquittée d’après les débits", 'VAT on debits', 'VAT payable according to debits', 'VAT due on payments received', "Option pour le paiement de la taxe d'après les débits"] %}
+  {% set special_vat_label = vat_legal_label and vat_legal_label not in normal_vat_labels %}
+  {% set should_print_vat_legal_sentence = legal_vat_sentence and (special_vat_label or supplier.vat_on_debits) %}
+  {% set legal_penalty_rate = (template_options.get('legal_penalty_rate') or penalties_label or '10')|replace('%', '')|trim %}
+  {% set legal_penalty_rate_lower = legal_penalty_rate|lower %}
+  {% set legal_penalty_rate_label = legal_penalty_rate if ('taux' in legal_penalty_rate_lower or 'bce' in legal_penalty_rate_lower) else (legal_penalty_rate ~ ('%' if is_english else ' %')) %}
+  {% set legal_recovery_fee = (template_options.get('legal_recovery_fee') or recovery_fee)|trim %}
+  {% set legal_recovery_fee_lower = legal_recovery_fee|lower %}
+  {% set legal_recovery_fee_label = legal_recovery_fee if ('€' in legal_recovery_fee or 'eur' in legal_recovery_fee_lower) else (legal_recovery_fee ~ (' EUR' if is_english else ' €')) %}
+  {% set quote_valid_until_label = invoice.due_date|fr_date if invoice.due_date else ('the indicated date' if is_english else 'la date indiquée') %}
+  {% set quote_terms_label = invoice.payment_terms or ('30 days' if is_english else '30 jours') %}
+  {% set quote_penalty_prefix = ((legal_vat_sentence ~ ' ') if should_print_vat_legal_sentence else '') ~ (('No early payment discount applies. In case of late payment on an agreed due date, penalties of') if is_english else ("Aucun escompte n'est accordé en cas de paiement anticipé. En cas de retard sur une échéance de paiement convenue, des pénalités au taux de")) %}
+  {% set invoice_penalty_prefix = ((legal_vat_sentence ~ ' ') if should_print_vat_legal_sentence else '') ~ ('In case of late payment, penalties of' if is_english else "Aucun escompte n'est accordé en cas de paiement anticipé. En cas de retard de paiement, des pénalités au taux de") %}
+  {% set configured_legal_penalty_prefix = (template_options.get('legal_penalty_prefix') or '')|trim %}
+  {% set configured_legal_recovery_prefix = (template_options.get('legal_recovery_prefix') or '')|trim %}
+  {% set legal_penalty_prefix = ((configured_legal_penalty_prefix if not legal_terms_default else '') or (quote_penalty_prefix if invoice.type == 'quote' else invoice_penalty_prefix))|trim %}
+  {% set legal_recovery_prefix = ((configured_legal_recovery_prefix if not legal_terms_default else '') or ('and a fixed recovery fee of' if is_english else "seront dues à compter du lendemain de l'échéance, ainsi qu'une indemnité forfaitaire de"))|trim %}
+  {% set quote_discount_text = 'apply. Quote acceptance records customer approval.' if is_english else "pour frais de recouvrement. L’acceptation du devis vaut accord du client." %}
+  {% set invoice_discount_text = 'apply. No early payment discount.' if is_english else "pour frais de recouvrement." %}
+  {% set legacy_quote_discount_text_fr = "pour frais de recouvrement. Signature précédée de la mention “Bon pour accord”." %}
+  {% set legacy_quote_discount_text_en = 'apply. Signature must be preceded by "Approved".' %}
+  {% if legal_terms_default %}
+    {% set legal_discount_text_raw = '' %}
+  {% else %}
+    {% set legal_discount_text_raw = (template_options.get('legal_discount_text') or '')|trim %}
+  {% endif %}
+  {% if invoice.type == 'quote' and legal_discount_text_raw in [legacy_quote_discount_text_fr, legacy_quote_discount_text_en] %}
+    {% set legal_discount_text_raw = '' %}
+  {% endif %}
+  {% set legal_discount_text = (legal_discount_text_raw or (quote_discount_text if invoice.type == 'quote' else invoice_discount_text))|trim %}
+  {% if legal_footer_text %}
+    {% set legal_footer_text_lower = legal_footer_text|lower %}
+    {% set vat_legal_label_lower = (vat_legal_label|lower) if vat_legal_label else '' %}
+    {% if should_print_vat_legal_sentence and legal_vat_sentence and vat_legal_label_lower and vat_legal_label_lower not in legal_footer_text_lower %}
+      {% set legal_printed = legal_vat_sentence ~ ' ' ~ legal_footer_text %}
+    {% else %}
+      {% set legal_printed = legal_footer_text %}
+    {% endif %}
+  {% else %}
+    {% set legal_printed = legal_penalty_prefix ~ ' ' ~ legal_penalty_rate_label ~ ' ' ~ legal_recovery_prefix ~ ' ' ~ legal_recovery_fee_label ~ ' ' ~ legal_discount_text %}
+	  {% endif %}
+  {% if invoice.type == 'quote' %}
+    {% set quote_valid_prefix = 'Quote valid until ' if is_english else "Devis valable jusqu'au " %}
+    {% if quote_valid_prefix in legal_printed %}
+      {% set quote_valid_before = legal_printed.split(quote_valid_prefix, 1)[0] %}
+      {% set quote_valid_after_raw = legal_printed.split(quote_valid_prefix, 1)[1] %}
+      {% set quote_valid_after = quote_valid_after_raw.split('.', 1)[1] if '.' in quote_valid_after_raw else '' %}
+      {% set legal_printed = (quote_valid_before ~ quote_valid_after)|replace('  ', ' ')|replace('  ', ' ')|trim %}
+    {% endif %}
+    {% set quote_acceptance_prefix = 'After acceptance, payment is due under the stated terms' if is_english else "Après acceptation du devis, le règlement intervient selon les conditions indiquées" %}
+    {% if quote_acceptance_prefix in legal_printed %}
+      {% set quote_acceptance_before = legal_printed.split(quote_acceptance_prefix, 1)[0] %}
+      {% set quote_acceptance_after_raw = legal_printed.split(quote_acceptance_prefix, 1)[1] %}
+      {% set quote_acceptance_after = quote_acceptance_after_raw.split('.', 1)[1] if '.' in quote_acceptance_after_raw else '' %}
+      {% set legal_printed = (quote_acceptance_before ~ quote_acceptance_after)|replace('  ', ' ')|replace('  ', ' ')|trim %}
+    {% endif %}
+  {% endif %}
+	  {% set supplier_legal_mentions = (supplier.legal_mentions or '')|trim %}
+	  {% set supplier_legal_mentions_lower = supplier_legal_mentions|lower %}
+	  {% set supplier_legal_mentions_is_default = supplier_legal_mentions and ('recouvrement' in supplier_legal_mentions_lower) and (('escompte' in supplier_legal_mentions_lower) or ('paiement anticipé' in supplier_legal_mentions_lower) or ('paiement anticipe' in supplier_legal_mentions_lower)) and (('pénalités de retard' in supplier_legal_mentions_lower) or ('penalites de retard' in supplier_legal_mentions_lower) or ('pénalités au taux' in supplier_legal_mentions_lower) or ('penalites au taux' in supplier_legal_mentions_lower) or ('retard de paiement' in supplier_legal_mentions_lower)) %}
+	  {% set supplier_legal_mentions_for_notice = '' if supplier_legal_mentions_is_default else supplier_legal_mentions %}
+	  {% set legal_print_extra = legal_mentions_extra %}
+	  {% if supplier_legal_mentions_for_notice and supplier_legal_mentions_for_notice not in legal_printed and supplier_legal_mentions_for_notice not in legal_mentions_extra %}
+	    {% if legal_print_extra %}
+	      {% set legal_print_extra = legal_print_extra ~ '\n\n' ~ supplier_legal_mentions_for_notice %}
+	    {% else %}
+	      {% set legal_print_extra = supplier_legal_mentions_for_notice %}
+	    {% endif %}
+	  {% endif %}
+  {% set document_kind = 'quote' if invoice.type == 'quote' else ('credit-note' if invoice.type == 'credit_note' else 'invoice') %}
+  <body class="theme-classic document-{{ document_kind }}">
+    <div class="page">
+      <div class="document-shell">
+        <div class="top-rule"></div>
+        <div class="document-body">
+        <div class="brand-row">
+          <div class="brand-left">
+            <div class="brand-mark-wrap{% if supplier.logo_url %} brand-mark-wrap-logo{% endif %}">
+              {% if supplier.logo_url %}
+              <div class="brand-mark brand-mark-logo">
+                <img src="{{ supplier.logo_url }}" alt="Logo {{ supplier.name or 'Entreprise' }}" />
+              </div>
+              {% else %}
+              <div class="brand-mark">{{ (supplier.name or 'P')[:1] }}</div>
+              {% endif %}
+            </div>
+          </div>
+
+          <div class="brand-right">
+            <div class="doc-kicker">{{ doc_title }}</div>
+            <div class="doc-number">{{ invoice.number or ('Draft' if is_english else 'Brouillon') }}</div>
+            {% if status_label %}
+            <div class="status-badge status-{{ status }}">{{ status_label }}</div>
+            {% endif %}
+          </div>
+        </div>
+
+        <div class="section-divider"></div>
+
+        <div class="detail-strip">
+          <div class="detail-item">
+            <div class="detail-label">{% if invoice.type == 'quote' %}{{ 'Quote date' if is_english else 'Date du devis' }}{% else %}{{ 'Issue date' if is_english else "Date d'émission" }}{% endif %}</div>
+            <div class="detail-value">{{ invoice.issue_date|fr_date }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">{{ 'Service date' if is_english else 'Date de prestation' }}</div>
+            <div class="detail-value">{{ invoice.service_date|fr_date if invoice.service_date else ('Not specified' if is_english else 'Non précisée') }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">{% if invoice.type == 'quote' %}{{ 'Valid until' if is_english else "Valable jusqu'au" }}{% else %}{{ 'Due date' if is_english else 'Échéance' }}{% endif %}</div>
+            <div class="detail-value">{{ invoice.due_date|fr_date if invoice.due_date else ('To be defined' if is_english else 'À définir') }}</div>
+          </div>
+          <div class="detail-item">
+            <div class="detail-label">{{ 'Terms' if is_english else 'Conditions' }}</div>
+            <div class="detail-value">{{ invoice.payment_terms or ('Not provided' if is_english else 'Non renseignées') }}</div>
+          </div>
+        </div>
+
+        <div class="party-grid">
+          <div class="party-col">
+            <div class="party-card">
+              <div class="party-band">
+                <div class="party-role">{{ 'Issuer' if is_english else 'Émetteur' }}</div>
+              </div>
+              <div class="party-body">
+                <div class="party-name">{{ supplier.name or '' }}</div>
+                <div class="party-copy">
+                  {% if supplier.address %}
+                  <div class="party-line">
+                    <span class="party-icon-cell"><svg class="party-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#A8B7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>
+                    <span class="party-line-text address-block">{{ supplier.address|postal_address }}</span>
+                  </div>
+                  {% endif %}
+                  {% if show_supplier_email and supplier.email %}
+                  <div class="party-line">
+                    <span class="party-icon-cell"><svg class="party-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#A8B7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg></span>
+                    <span class="party-line-text party-link">{{ supplier.email }}</span>
+                  </div>
+                  {% endif %}
+                  {% if show_supplier_phone and supplier.phone %}
+                  <div class="party-line">
+                    <span class="party-icon-cell"><svg class="party-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#A8B7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v2.4a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.2 19.2 0 0 1-5.9-5.9 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.2 1.5h2.4a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1l-1 1a16 16 0 0 0 5.9 5.9l1-1a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z"></path></svg></span>
+                    <span class="party-line-text">{{ supplier.phone|fr_phone }}</span>
+                  </div>
+                  {% endif %}
+                </div>
+                <div class="party-identity">
+                  <div class="party-identity-wrap">
+                    <span class="party-identity-icon-cell"><svg class="party-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#A8B7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V7a2 2 0 0 1 2-2h6v16"></path><path d="M12 9h6a2 2 0 0 1 2 2v10"></path><path d="M8 9h1M8 13h1M8 17h1M16 13h1M16 17h1M3 21h18"></path></svg></span>
+                    <span class="party-identity-list">
+                      {% if supplier.siren %}<div class="party-identity-row"><strong>SIREN</strong><span>{{ supplier.siren|fr_siren }}</span></div>{% endif %}
+                      {% if supplier.legal_id %}<div class="party-identity-row"><strong>SIRET</strong><span>{{ supplier.legal_id|fr_siret }}</span></div>{% endif %}
+                      {% if supplier.vat_number %}
+                      <div class="party-identity-row"><strong>N° TVA</strong><span>{{ supplier.vat_number|fr_vat }}</span></div>
+                      {% elif supplier.vat_exemption_notice %}
+                      <div class="party-identity-row"><strong>TVA</strong><span>{{ supplier.vat_exemption_notice }}</span></div>
+                      {% endif %}
+                    </span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="party-sep"><div class="party-arrow">›</div></div>
+
+          {% set customer_client_type = (customer.client_type|default(customer.type|default('')))|string|lower %}
+          {% set customer_is_individual = customer_client_type in ['individual', 'particulier', 'person', 'consumer', 'b2c'] %}
+          <div class="party-col">
+            <div class="party-card party-card-client">
+              <div class="party-band">
+                <div class="party-role">{% if invoice.type == 'quote' %}{{ 'Quote for' if is_english else 'Devis pour' }}{% else %}{{ 'Bill to' if is_english else 'Facturé à' }}{% endif %}</div>
+              </div>
+              <div class="party-body">
+                <div class="party-name">{{ customer.name or '' }}</div>
+                <div class="party-copy">
+                  {% if customer.address %}
+                  <div class="party-line">
+                    <span class="party-icon-cell"><svg class="party-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#A8B7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 21s7-5.1 7-11a7 7 0 1 0-14 0c0 5.9 7 11 7 11Z"></path><circle cx="12" cy="10" r="2.5"></circle></svg></span>
+                    <span class="party-line-text address-block">{{ customer.address|postal_address }}</span>
+                  </div>
+                  {% endif %}
+                  {% if customer.email %}
+                  <div class="party-line">
+                    <span class="party-icon-cell"><svg class="party-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#A8B7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="5" width="18" height="14" rx="2"></rect><path d="m3 7 9 6 9-6"></path></svg></span>
+                    <span class="party-line-text party-link">{{ customer.email }}</span>
+                  </div>
+                  {% endif %}
+                  {% if customer.phone %}
+                  <div class="party-line">
+                    <span class="party-icon-cell"><svg class="party-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#A8B7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M22 16.9v2.4a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.2 19.2 0 0 1-5.9-5.9 19.8 19.8 0 0 1-3.1-8.6A2 2 0 0 1 4.2 1.5h2.4a2 2 0 0 1 2 1.7c.1 1 .4 2 .7 2.9a2 2 0 0 1-.5 2.1l-1 1a16 16 0 0 0 5.9 5.9l1-1a2 2 0 0 1 2.1-.5c.9.3 1.9.6 2.9.7a2 2 0 0 1 1.7 2Z"></path></svg></span>
+                    <span class="party-line-text">{{ customer.phone|fr_phone }}</span>
+                  </div>
+                  {% endif %}
+                </div>
+                {% if not customer_is_individual and (customer.siren or customer.siret or customer.legal_id or customer.vat_number) %}
+                <div class="party-identity">
+                  <div class="party-identity-wrap">
+                    <span class="party-identity-icon-cell"><svg class="party-icon" viewBox="0 0 24 24" aria-hidden="true" fill="none" stroke="#A8B7CC" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M4 21V7a2 2 0 0 1 2-2h6v16"></path><path d="M12 9h6a2 2 0 0 1 2 2v10"></path><path d="M8 9h1M8 13h1M8 17h1M16 13h1M16 17h1M3 21h18"></path></svg></span>
+                    <span class="party-identity-list">
+                      {% if customer.siren %}<div class="party-identity-row"><strong>SIREN</strong><span>{{ customer.siren|fr_siren }}</span></div>{% endif %}
+                      {% if customer.siret %}<div class="party-identity-row"><strong>SIRET</strong><span>{{ customer.siret|fr_siret }}</span></div>{% elif customer.legal_id and not customer.siren %}<div class="party-identity-row"><strong>SIREN / SIRET</strong><span>{{ customer.legal_id }}</span></div>{% endif %}
+                      {% if customer.vat_number %}<div class="party-identity-row"><strong>N° TVA</strong><span>{{ customer.vat_number|fr_vat }}</span></div>{% endif %}
+                    </span>
+                  </div>
+                </div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div class="section-label">{{ 'Line items' if is_english else 'Détail des prestations' }}</div>
+        {% if document_title %}
+        <div class="document-title-box document-title-before-lines">{{ document_title }}</div>
+        {% endif %}
+        <div class="table-wrap">
+          <table class="items{% if show_line_discount_column or show_line_discounted_total_column %} items-with-discount{% else %} items-standard{% endif %}{% if show_line_unit_column %} items-with-unit{% endif %}">
+            <colgroup>
+              {% if show_line_number_column %}<col class="item-col-index">{% endif %}
+              {% if show_line_reference_column %}<col class="item-col-reference">{% endif %}
+              <col class="item-col-product">
+              {% if show_line_quantity_column %}<col class="item-col-qty">{% endif %}
+              {% if show_line_unit_column %}<col class="item-col-unit">{% endif %}
+              {% if show_line_unit_price_column %}<col class="item-col-unit-price">{% endif %}
+              {% if show_line_vat_column %}<col class="item-col-vat">{% endif %}
+              {% if show_line_discount_column %}<col class="item-col-discount">{% endif %}
+              {% if show_line_base_total_column %}<col class="item-col-total">{% endif %}
+              {% if show_line_discounted_total_column %}<col class="item-col-discounted-total">{% endif %}
+            </colgroup>
+            <thead>
+              <tr>
+                {% if show_line_number_column %}<th class="index-cell">{{ 'No.' if is_english else 'N°' }}</th>{% endif %}
+                {% if show_line_reference_column %}<th class="reference-cell">{{ 'Reference' if is_english else 'Référence' }}</th>{% endif %}
+                <th>{{ 'Product / service' if is_english else 'Produit / service' }}</th>
+                {% if show_line_quantity_column %}<th class="num">{{ 'Qty' if is_english else 'Qté' }}</th>{% endif %}
+                {% if show_line_unit_column %}<th class="num">{{ 'Unit' if is_english else 'Unité' }}</th>{% endif %}
+                {% if show_line_unit_price_column %}<th class="num">{{ 'Unit price excl. VAT' if is_english else 'PU HT' }}</th>{% endif %}
+                {% if show_line_vat_column %}<th class="num">{{ 'VAT' if is_english else 'TVA' }}</th>{% endif %}
+                {% if show_line_discount_column %}<th class="num discount-col">{{ 'Discount' if is_english else 'Remise' }}</th>{% endif %}
+                {% if show_line_base_total_column %}<th class="num">{{ 'Total excl. VAT' if is_english else 'Total HT' }}</th>{% endif %}
+                {% if show_line_discounted_total_column %}<th class="num discount-col">{{ 'Discounted excl. VAT' if is_english else 'HT remisé' }}</th>{% endif %}
+              </tr>
+            </thead>
+            <tbody>
+              {% set item_line_ns = namespace(index=0) %}
+              {% for l in lines %}
+              {% set line_type = (l.line_type|default('item')|string|lower) %}
+              {% if line_type == 'title' or line_type == 'section' %}
+              <tr>
+                <td colspan="{{ line_ns.colspan }}" class="line-section-title">{{ l.product_name }}</td>
+              </tr>
+              {% elif line_type == 'comment' %}
+              <tr>
+                <td colspan="{{ line_ns.colspan }}" class="line-comment-text">{{ l.detail or l.product_name }}</td>
+              </tr>
+              {% else %}
+              {% set item_line_ns.index = item_line_ns.index + 1 %}
+              <tr>
+                {% if show_line_number_column %}<td class="index-cell"><span class="line-index">{{ item_line_ns.index }}</span></td>{% endif %}
+                {% if show_line_reference_column %}<td class="reference-cell"><div class="line-reference">{{ l.reference or l.display_number or '—' }}</div></td>{% endif %}
+                {% set line_vat_reason = line_vat_reason_label(l, supplier, is_english) %}
+                {% set line_vat_reason_visible = '' if should_print_vat_legal_sentence and line_vat_reason and line_vat_reason == vat_legal_label else line_vat_reason %}
+                <td>
+                  <div class="line-name">{{ l.product_name }}</div>
+                  {% if line_vat_reason_visible or l.detail %}
+                  <div class="line-detail">
+                    {% if line_vat_reason_visible %}{{ line_vat_reason_visible }}{% if l.detail %} · {% endif %}{% endif %}{{ l.detail or '' }}
+                  </div>
+                  {% endif %}
+                </td>
+                {% if show_line_quantity_column %}<td class="num">{{ l.quantity|fr_number }}</td>{% endif %}
+                {% if show_line_unit_column %}<td class="num">{{ l.unit_code or '—' }}</td>{% endif %}
+                {% if show_line_unit_price_column %}
+                {% set unit_price_amount_full = l.unit_price|fr_amount %}
+                {% set unit_price_amount = (l.unit_price|fr_amount_compact) if unit_price_amount_full|length > 18 else unit_price_amount_full %}
+                <td class="num"><span class="amount-fit{% if unit_price_amount|length > 18 %} amount-very-long{% elif unit_price_amount|length > 15 %} amount-long{% endif %}">{{ unit_price_amount }}</span></td>
+                {% endif %}
+                {% if show_line_vat_column %}
+                <td class="num">
+                  <span class="vat-badge">{{ l.vat_rate|fr_percent }}</span>
+                </td>
+                {% endif %}
+                {% if show_line_discount_column %}
+                <td class="num discount-col">
+                  {% if l.pdf_discount_amount_ht %}
+                    {% if l.pdf_discount_percent %}<strong>{{ l.pdf_discount_percent|fr_number }} %</strong>{% else %}{% set discount_amount_full = ('- ' ~ (l.pdf_discount_amount_ht|fr_amount)) %}{% set discount_amount = ('- ' ~ (l.pdf_discount_amount_ht|fr_amount_compact)) if discount_amount_full|length > 18 else discount_amount_full %}<strong class="amount-fit{% if discount_amount|length > 18 %} amount-very-long{% elif discount_amount|length > 15 %} amount-long{% endif %}">{{ discount_amount }}</strong>{% endif %}
+                  {% else %}
+                    0 %
+                  {% endif %}
+                </td>
+                {% endif %}
+                {% if show_line_base_total_column %}
+                {% set line_total_amount_full = l.line_total|fr_amount %}
+                {% set line_total_amount = (l.line_total|fr_amount_compact) if line_total_amount_full|length > 18 else line_total_amount_full %}
+                <td class="num"><strong class="amount-fit{% if line_total_amount|length > 18 %} amount-very-long{% elif line_total_amount|length > 15 %} amount-long{% endif %}">{{ line_total_amount }}</strong></td>
+                {% endif %}
+                {% if show_line_discounted_total_column %}
+                {% set discounted_line_total = l.pdf_discounted_total_ht if l.pdf_discounted_total_ht is defined and l.pdf_discounted_total_ht is not none else l.line_total %}
+                {% set discounted_line_total_amount_full = discounted_line_total|fr_amount %}
+                {% set discounted_line_total_amount = (discounted_line_total|fr_amount_compact) if discounted_line_total_amount_full|length > 18 else discounted_line_total_amount_full %}
+                <td class="num discount-col"><strong class="amount-fit{% if discounted_line_total_amount|length > 18 %} amount-very-long{% elif discounted_line_total_amount|length > 15 %} amount-long{% endif %}">{{ discounted_line_total_amount }}</strong></td>
+                {% endif %}
+              </tr>
+              {% endif %}
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+
+        <div class="totals-wrap">
+          <div class="totals-box">
+            <table class="totals-table">
+              {% if totals.allowance %}
+              <tr>
+                <th>{{ 'Subtotal excl. VAT' if is_english else 'Sous-total HT' }}</th>
+                <td>{{ (totals.ht + (totals.allowance or 0))|fr_amount }}</td>
+              </tr>
+              <tr>
+                <th>{{ 'Discounts excl. VAT' if is_english else 'Remises HT' }}</th>
+                <td>- {{ totals.allowance|fr_amount }}</td>
+              </tr>
+              <tr>
+                <th>{{ 'Total excl. VAT' if is_english else 'Total HT' }}</th>
+                <td>{{ totals.ht|fr_amount }}</td>
+              </tr>
+              {% else %}
+              <tr>
+                <th>{{ 'Total excl. VAT' if is_english else 'Total HT' }}</th>
+                <td>{{ totals.ht|fr_amount }}</td>
+              </tr>
+              {% endif %}
+              <tr>
+                <th>{{ 'VAT' if is_english else 'TVA' }}{% if totals.vat and totals.ht %} ({{ ((totals.vat / totals.ht) * 100)|fr_number if totals.ht else '0,00' }} %){% endif %}</th>
+                <td>{{ totals.vat|fr_amount }}</td>
+              </tr>
+              <tr class="total">
+                <th>{{ 'Total incl. VAT' if is_english else 'Total TTC' }}</th>
+                <td>{{ totals.ttc|fr_amount }}</td>
+              </tr>
+              {% set requested_advance = template_options.get('requested_advance') if invoice.type != 'quote' else none %}
+              {% if requested_advance and requested_advance.get('amount_ttc') %}
+              <tr class="requested-advance">
+                <th>{{ 'Advance requested on quote' if is_english else 'Acompte demandé au devis' }}</th>
+                <td>{{ requested_advance.get('amount_ttc')|fr_amount }}</td>
+              </tr>
+              {% endif %}
+              {% if totals.prepaid %}
+              <tr>
+                <th>
+                  {% if invoice.type == 'quote' %}
+                    {{ 'Requested advance' if is_english else 'Acompte demandé' }}
+                  {% else %}
+                    {{ 'Advance already paid' if is_english else 'Acompte déjà versé' }}
+                  {% endif %}
+                </th>
+                <td>{% if invoice.type == 'quote' %}{{ totals.prepaid|fr_amount }}{% else %}- {{ totals.prepaid|fr_amount }}{% endif %}</td>
+              </tr>
+              {% endif %}
+              {% if invoice.balance_due is not none and invoice.type != 'quote' and totals.prepaid %}
+              <tr class="balance">
+                <th>{{ 'Amount due' if is_english else 'Reste dû' }}</th>
+                <td>{{ invoice.balance_due|fr_amount }}</td>
+              </tr>
+              {% endif %}
+            </table>
+          </div>
+        </div>
+
+        {% set show_structured_export_support = invoice.type != 'quote' and (is_facturx_pdf|default(false)) %}
+        {% set support_vat_label = vat_display_label %}
+        {% if not support_vat_label and invoice.type != 'credit_note' and not supplier_vat_exemption_notice %}
+          {% set support_vat_label = 'VAT due on payments received' if is_english else "TVA exigible à l'encaissement" %}
+        {% endif %}
+        {% set show_order_support = show_purchase_order_number and invoice.purchase_order_number %}
+        {% set show_payment_terms_support = supplier.payment_terms_block or legal_penalty_rate_label or legal_recovery_fee_label %}
+        {% set show_legal_support_card = show_structured_export_support or support_vat_label or show_order_support or show_payment_terms_support %}
+        {% set show_support_grid = show_delivery_address or supplier.iban or supplier.bic or supplier.payment_terms_block or supplier.legal_mentions or operation_nature_label or payment_method_label or show_legal_support_card %}
+        {% if show_support_grid %}
+        <div class="support-grid{% if not show_legal_support_card %} support-grid-payment-only{% endif %}">
+          <div class="support-col">
+            <div class="support-card support-card-payment">
+              <div class="support-title">{{ 'Payment' if is_english else 'Paiement' }}</div>
+              <div class="support-copy">
+                {% if show_delivery_address %}
+                  {% if invoice.delivery_address and (invoice.delivery_address_differs or invoice.delivery_address|trim != (customer.address or '')|trim) %}
+                  <div class="support-row"><span class="label">{{ 'Delivery' if is_english else 'Livraison' }}</span><span class="value">{{ 'Different from billing address' if is_english else 'Adresse de livraison : différente de la facturation' }}<br />{{ invoice.delivery_address|postal_address }}</span></div>
+                  {% else %}
+                  <div class="support-row"><span class="label">{{ 'Delivery' if is_english else 'Livraison' }}</span><span class="value">{{ 'Delivery address: same as billing' if is_english else 'Adresse de livraison : identique à la facturation' }}</span></div>
+                  {% endif %}
+                {% endif %}
+                {% if operation_nature_label %}
+                <div class="support-row"><span class="label">{{ 'Nature' if is_english else 'Nature' }}</span><span class="value">{{ operation_nature_label }}</span></div>
+                {% endif %}
+                <div class="support-row"><span class="label">{{ 'Payment' if is_english else 'Paiement' }}</span><span class="value">{{ payment_method_label }}</span></div>
+                {% if supplier.iban %}
+                <div class="support-row"><span class="label">IBAN</span><span class="value bank-value">{{ supplier.iban|fr_iban }}</span></div>
+                {% endif %}
+                {% if supplier.bic %}
+                <div class="support-row"><span class="label">BIC</span><span class="value bank-value">{{ supplier.bic }}</span></div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+
+          {% if show_legal_support_card %}
+          <div class="support-col">
+            <div class="support-card support-card-legal">
+              <div class="support-title">{{ 'Legal notices' if is_english else 'Mentions légales' }}</div>
+              <div class="support-copy">
+                {% if show_structured_export_support %}
+                <div class="support-row"><span class="label">Factur-X</span><span class="value">{{ facturx_profile_label }}</span></div>
+                {% endif %}
+                {% if support_vat_label %}
+                <div class="support-row"><span class="label">{{ 'VAT' if is_english else 'TVA' }}</span><span class="value">{{ support_vat_label|safe }}</span></div>
+                {% endif %}
+                {% if show_purchase_order_number and invoice.purchase_order_number %}
+                <div class="support-row"><span class="label">{{ 'Order' if is_english else 'Commande' }}</span><span class="value">{{ invoice.purchase_order_number }}</span></div>
+                {% endif %}
+                {% if legal_penalty_rate_label %}
+                <div class="support-row"><span class="label">{{ 'Late penalties' if is_english else 'Pénalités' }}</span><span class="value">{{ legal_penalty_rate_label }}</span></div>
+                {% endif %}
+                {% if legal_recovery_fee_label %}
+                <div class="support-row"><span class="label">{{ 'Recovery fee' if is_english else 'Indemnité' }}</span><span class="value">{{ legal_recovery_fee_label }}</span></div>
+                {% endif %}
+              </div>
+            </div>
+          </div>
+          {% endif %}
+        </div>
+        {% endif %}
+
+        {% if invoice.type == 'credit_note' and invoice.related_number %}
+        <div class="note-box">
+          <div class="note-title">{{ 'Original invoice' if is_english else "Facture d'origine" }}</div>
+          <div class="note-copy">{{ invoice.related_number }}</div>
+        </div>
+        {% endif %}
+
+        {% if note and show_note %}
+        <div class="note-box">
+          <div class="note-copy">{{ note|multiline_text }}</div>
+        </div>
+        {% endif %}
+
+        {% if custom_fields %}
+        <div class="note-box">
+          <div class="note-title">{{ 'References' if is_english else 'Références' }}</div>
+          <div class="note-copy">
+            {% for field in custom_fields %}
+              {% if field.label or field.value %}
+              <div>{% if field.label %}<strong>{{ field.label }}</strong>{% endif %}{% if field.label and field.value %} : {% endif %}{{ field.value }}</div>
+              {% endif %}
+            {% endfor %}
+          </div>
+        </div>
+        {% endif %}
+        <div class="note-box legal-print">
+          <div class="note-copy">{% if legal_print_extra %}{{ legal_print_extra }}{{ '\n\n' }}{% endif %}{{ legal_printed }}</div>
+        </div>
+
+        <div class="footer" aria-hidden="true"></div>
+        </div>
+      </div>
+    </div>
+  </body>
+</html>
