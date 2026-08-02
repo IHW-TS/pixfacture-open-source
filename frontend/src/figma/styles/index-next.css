@@ -1,0 +1,1345 @@
+@import "./fonts.css";
+@import "./tailwind.css";
+
+/* Keep Figma pages visually isolated from legacy global styles. */
+.figma-root {
+  font-family:
+    "Inter",
+    -apple-system,
+    BlinkMacSystemFont,
+    "Segoe UI",
+    sans-serif;
+  --pf-app-text-overline: 0.6875rem;
+  --pf-app-table-header: 0.75rem;
+  --pf-app-text-caption: 0.75rem;
+  --pf-app-text-body: 0.8125rem;
+  --pf-app-text-title: 1.125rem;
+  --pf-app-text-value: 1.375rem;
+  --pf-app-line-tight: 1.2;
+  --pf-app-line-normal: 1.45;
+  --pf-invoice-primary: #5b5ef4;
+  --pf-invoice-primary-strong: #4a4ce0;
+  --pf-invoice-soft: #eff0fe;
+  --pf-invoice-border: #c7d2fe;
+  --pf-document-text-overline: var(--pf-document-text-body);
+  --pf-document-text-caption: var(--pf-document-text-body);
+  --pf-document-text-body: 0.78125rem;
+  --pf-document-text-strong: 0.8125rem;
+  --pf-document-text-title: 0.95rem;
+  --pf-document-control-height: 2rem;
+  --pf-document-control-compact-height: 1.75rem;
+  --pf-document-card-radius: 20px;
+  --pf-document-card-border: #dbe4ef;
+  --pf-document-muted: #64748b;
+  --pf-document-title: #0f172a;
+}
+
+.figma-root,
+.figma-root * {
+  box-sizing: border-box;
+}
+
+.figma-root main {
+  margin-top: 0;
+}
+
+.figma-root .pf-app-shell {
+  font-size: var(--pf-app-text-body);
+  line-height: var(--pf-app-line-normal);
+}
+
+.figma-root h1,
+.figma-root h2,
+.figma-root h3,
+.figma-root h4,
+.figma-root h5,
+.figma-root h6,
+.figma-root p,
+.figma-root label,
+.figma-root button,
+.figma-root input,
+.figma-root textarea,
+.figma-root select,
+.figma-root td,
+.figma-root th,
+.figma-root li {
+  font-family: inherit;
+  margin: 0;
+}
+
+:where(.figma-root a) {
+  color: inherit;
+  font-weight: inherit;
+  text-decoration: none;
+}
+
+.figma-root :focus-visible {
+  outline: 2px solid rgba(29, 78, 216, 0.5);
+  outline-offset: 2px;
+  border-radius: 8px;
+}
+
+.figma-root [data-invoice-print-paper] :where(input, textarea, select):focus-visible {
+  outline: none;
+  outline-offset: 0;
+}
+
+.figma-root ::selection {
+  background: rgba(29, 78, 216, 0.15);
+  color: #1e293b;
+}
+
+/* Safari iOS zoome les formulaires lorsque la taille calculée est inférieure à 16 px. */
+@media (max-width: 767px) {
+  .figma-root
+    :is(input, textarea, select):not([type="checkbox"]):not([type="radio"]):not([type="range"]):not([type="color"]):not(
+      [type="file"]
+    ) {
+    font-size: 1rem !important;
+  }
+}
+
+@media (orientation: landscape) and (max-height: 420px) and (max-width: 932px) {
+  .figma-root .auth-layout__mobile-header {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .figma-root .auth-layout__main {
+    align-items: flex-start;
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .figma-root .auth-layout__pill {
+    display: none;
+  }
+
+  .figma-root .auth-login__heading {
+    margin-bottom: 0.5rem;
+  }
+
+  .figma-root .auth-login__form > :not([hidden]) ~ :not([hidden]) {
+    margin-top: 0.375rem;
+  }
+
+  .figma-root .auth-login__input {
+    padding-top: 0.5rem;
+    padding-bottom: 0.5rem;
+  }
+
+  .figma-root .landing-hero {
+    min-height: auto;
+    align-items: flex-start;
+  }
+
+  .figma-root .landing-hero__content {
+    padding-top: 4.5rem;
+    padding-bottom: 2rem;
+  }
+
+  .figma-root .landing-hero__copy {
+    gap: 0.75rem;
+  }
+
+  .figma-root .landing-hero__copy h1 {
+    max-width: 14ch;
+    font-size: 2rem;
+    line-height: 1.05;
+  }
+
+  .figma-root .landing-hero__subtitle {
+    font-size: 0.875rem;
+    line-height: 1.4;
+  }
+
+  .figma-root .landing-hero__badge,
+  .figma-root .landing-hero__trust,
+  .figma-root .landing-hero__visual,
+  .figma-root .landing-hero__stats,
+  .figma-root .landing-hero__scroll {
+    display: none;
+  }
+}
+
+.figma-root .auth-register__form :is(input, button):disabled {
+  cursor: not-allowed;
+}
+
+.figma-root .auth-register__form input:disabled {
+  background-color: #f1f5f9;
+  color: #64748b;
+  opacity: 1;
+}
+
+.figma-root .auth-register__form button:disabled {
+  opacity: 0.5;
+}
+
+@media (orientation: portrait) and (max-width: 360px) and (max-height: 640px) {
+  .figma-root .landing-hero__badge {
+    display: none;
+  }
+}
+
+.figma-root tbody tr {
+  border-bottom: 1px solid #f8fafc;
+  transition: background-color 120ms ease;
+}
+
+.figma-root tbody tr:hover {
+  background-color: #f8fafc;
+}
+
+.figma-root tbody tr:last-child {
+  border-bottom: none;
+}
+
+.figma-root .scrollbar-hide {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.figma-root .scrollbar-hide::-webkit-scrollbar {
+  display: none;
+}
+
+.figma-root .scrollbar-thin {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255, 255, 255, 0.08) transparent;
+}
+
+.figma-root .scrollbar-thin::-webkit-scrollbar {
+  width: 3px;
+}
+
+.figma-root .scrollbar-thin::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.figma-root .scrollbar-thin::-webkit-scrollbar-thumb {
+  background: rgba(255, 255, 255, 0.08);
+  border-radius: 4px;
+}
+
+.figma-root .invoice-history-scrollbar {
+  scrollbar-width: thin;
+  scrollbar-color: rgba(51, 65, 85, 0.42) transparent;
+}
+
+.figma-root .invoice-history-scrollbar::-webkit-scrollbar {
+  width: 4px;
+}
+
+.figma-root .invoice-history-scrollbar::-webkit-scrollbar-track {
+  background: transparent;
+}
+
+.figma-root .invoice-history-scrollbar::-webkit-scrollbar-thumb {
+  background: rgba(51, 65, 85, 0.42);
+  border-radius: 999px;
+}
+
+.figma-root .pf-invoice-detail {
+  --pf-invoice-card-radius: 1rem;
+  --pf-invoice-inner-radius: 0.875rem;
+  --pf-invoice-card-border: #dbe4ef;
+  --pf-invoice-soft-border: #eef2f7;
+  --pf-invoice-card-shadow: 0 18px 42px -34px rgba(15, 23, 42, 0.72);
+  color: #0f172a;
+  font-size: var(--pf-app-text-body);
+  line-height: var(--pf-app-line-normal);
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-card {
+  overflow: hidden;
+  border: 1px solid var(--pf-invoice-card-border);
+  border-radius: var(--pf-invoice-card-radius);
+  background: #ffffff;
+  box-shadow: var(--pf-invoice-card-shadow);
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-soft-card {
+  border: 1px solid var(--pf-invoice-soft-border);
+  border-radius: var(--pf-invoice-inner-radius);
+  background: #f8fafc;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-overline {
+  color: #94a3b8;
+  font-size: var(--pf-app-text-overline) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.08em !important;
+  line-height: var(--pf-app-line-tight);
+  text-transform: uppercase;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-caption {
+  font-size: var(--pf-app-text-caption) !important;
+  font-weight: 500 !important;
+  line-height: 1.35;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-body {
+  font-size: var(--pf-app-text-body) !important;
+  font-weight: 500 !important;
+  line-height: var(--pf-app-line-normal);
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-title {
+  font-size: var(--pf-app-text-body) !important;
+  font-weight: 650 !important;
+  line-height: 1.3;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-value {
+  font-size: 0.9375rem !important;
+  font-weight: 700 !important;
+  line-height: 1.25;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-rail {
+  border-left: 1px solid #e2e8f0;
+  background: #ffffff;
+  box-shadow: -18px 0 38px -42px rgba(15, 23, 42, 0.6);
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-rail-section {
+  border-bottom: 1px solid #eef2f7;
+  padding: 0.875rem 1rem;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-rail-row {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 1rem;
+  color: #475569;
+  font-size: var(--pf-app-text-caption);
+  line-height: 1.35;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-rail-label {
+  min-width: 0;
+  color: #94a3b8;
+  font-weight: 500;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-rail-label--nowrap {
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-rail-value {
+  min-width: 0;
+  max-width: 62%;
+  color: #0f172a;
+  font-weight: 650;
+  overflow-wrap: anywhere;
+  text-align: right;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-rail-value--nowrap {
+  flex-shrink: 0;
+  max-width: none;
+  font-variant-numeric: tabular-nums;
+  overflow-wrap: normal;
+  white-space: nowrap;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-action-card {
+  min-height: 3.375rem;
+  border: 1px solid #dbe4ef;
+  border-radius: var(--pf-invoice-inner-radius);
+  background: #ffffff;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-action-card-title {
+  color: #0f172a;
+  font-size: var(--pf-app-text-body) !important;
+  font-weight: 650 !important;
+  line-height: 1.2;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-action-card-detail {
+  color: #64748b;
+  font-size: var(--pf-app-text-caption) !important;
+  font-weight: 500 !important;
+  line-height: 1.25;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-mini-button {
+  height: 2rem;
+  border-radius: 0.75rem;
+  font-size: var(--pf-app-text-caption) !important;
+  font-weight: 650 !important;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-amount-card {
+  border: 1px solid var(--pf-invoice-soft-border);
+  border-radius: var(--pf-invoice-inner-radius);
+  background: #f8fafc;
+  padding: 0.875rem 1rem;
+  text-align: center;
+}
+
+.figma-root .pf-invoice-detail .pf-invoice-toolbar-button {
+  height: 2rem;
+  border-radius: 0.75rem !important;
+  padding-inline: 0.75rem;
+  font-size: var(--pf-app-text-body) !important;
+  font-weight: 600 !important;
+}
+
+/* Dense document surfaces shared by invoice creation and invoice preview.
+   Keep these rules scoped to the document paper to avoid changing list pages. */
+.figma-root [data-invoice-print-paper],
+.figma-root [data-testid="invoice-document-preview"] {
+  color: var(--pf-document-title);
+  font-family: Inter, "DejaVu Sans", Arial, sans-serif;
+  font-size: var(--pf-document-text-body);
+  line-height: 1.45;
+  --pf-document-party-name: 0.875rem;
+  --pf-document-title-box: var(--pf-document-text-body);
+}
+
+.figma-root [data-invoice-print-paper] {
+  --pf-document-text-overline: var(--pf-document-text-body);
+  --pf-document-text-caption: var(--pf-document-text-body);
+  --pf-document-text-strong: var(--pf-document-text-body);
+  --pf-document-text-title: var(--pf-document-text-body);
+}
+
+.figma-root [data-testid="invoice-document-preview"] {
+  position: relative;
+  min-width: 0;
+  --pf-preview-page-height: 1122px;
+}
+
+.figma-root [data-testid="invoice-document-preview"]::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: 20;
+  pointer-events: none;
+  background-image: repeating-linear-gradient(
+    to bottom,
+    transparent 0 calc(var(--pf-preview-page-height) - 1px),
+    rgba(29, 78, 216, 0.28) calc(var(--pf-preview-page-height) - 1px) var(--pf-preview-page-height)
+  );
+}
+
+@media print {
+  .figma-root [data-testid="invoice-document-preview"]::after {
+    display: none !important;
+  }
+}
+
+.figma-root [data-testid="invoice-document-preview"] {
+  --pf-document-text-overline: var(--pf-document-text-body);
+  --pf-document-text-caption: var(--pf-document-text-body);
+  --pf-document-text-strong: var(--pf-document-text-body);
+  --pf-document-text-title: var(--pf-document-text-body);
+}
+
+.figma-root [data-invoice-print-paper] input:not([type="checkbox"]),
+.figma-root [data-invoice-print-paper] select,
+.figma-root [data-invoice-print-paper] textarea,
+.figma-root [data-testid="invoice-document-preview"] input:not([type="checkbox"]),
+.figma-root [data-testid="invoice-document-preview"] select,
+.figma-root [data-testid="invoice-document-preview"] textarea {
+  font-size: var(--pf-document-text-body) !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="invoice-paper-meta-band"] input,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-paper-meta-band"] select,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-paper-meta-band"] button,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-delivery-payment-card"] select,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-delivery-payment-card"] input,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-mentions-card"] select,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-mentions-card"] input {
+  font-weight: 650 !important;
+}
+
+.figma-root [data-invoice-print-paper] .font-mono,
+.figma-root [data-testid="invoice-document-preview"] .font-mono {
+  font-family: "DejaVu Sans Mono", ui-monospace, SFMono-Regular, Menlo, monospace !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="document-title-section"] input {
+  height: 2.25rem !important;
+  font-size: var(--pf-document-title-box) !important;
+  font-weight: 700 !important;
+}
+
+.figma-root [data-invoice-print-paper] button,
+.figma-root [data-invoice-print-paper] button :where(span, strong, div),
+.figma-root [data-invoice-print-paper] [role="button"],
+.figma-root [data-invoice-print-paper] [role="button"] :where(span, strong, div),
+.figma-root [data-invoice-print-paper] [role="option"],
+.figma-root [data-invoice-print-paper] [role="option"] :where(span, strong, div) {
+  font-size: var(--pf-document-text-body) !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="document-title-section"] {
+  display: block !important;
+  margin-top: 1rem !important;
+  margin-bottom: 1.25rem !important;
+}
+
+.figma-root [data-testid="invoice-document-preview"] :where(p, td, th) {
+  white-space: pre-wrap;
+  min-width: 0;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+  word-break: break-word;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="invoice-paper-meta-band"] {
+  border-radius: 0.875rem !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="invoice-paper-meta-band"] label,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-paper-meta-band"] > div {
+  height: 3.875rem !important;
+  padding-inline: 0.75rem !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="invoice-paper-meta-band"] input,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-paper-meta-band"] select,
+.figma-root [data-invoice-print-paper] [data-testid="paper-payment-terms"] {
+  height: var(--pf-document-control-compact-height) !important;
+  font-size: var(--pf-document-text-strong) !important;
+  font-weight: 650 !important;
+}
+
+.figma-root
+  [data-invoice-print-paper]
+  :where(
+    [data-testid="invoice-paper-meta-band"],
+    [data-testid="document-issuer-card"],
+    [data-testid="document-client-card"],
+    #document-lines-section,
+    [data-testid="document-routing-options"],
+    [data-testid="document-totals-summary"],
+    [data-testid="invoice-legal-footer"],
+    [data-testid="invoice-delivery-payment-card"],
+    [data-testid="invoice-mentions-card"]
+  )
+  :where(input:not([type="checkbox"]), select, textarea, button, a, p, span, label, div, strong) {
+  font-size: var(--pf-document-text-body) !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-document-party-name] {
+  font-size: var(--pf-document-party-name) !important;
+  font-weight: 800 !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="document-totals-summary"] > div {
+  min-height: var(--pf-document-control-height);
+  padding-top: 0.5rem !important;
+  padding-bottom: 0.5rem !important;
+}
+
+.figma-root
+  [data-invoice-print-paper]
+  :where(
+    [data-testid="document-issuer-card"],
+    [data-testid="document-client-card"],
+    [data-testid="invoice-delivery-payment-card"],
+    [data-testid="invoice-mentions-card"],
+    [data-testid="document-totals-summary"]
+  )
+  :where(*:not(svg):not(path)) {
+  font-size: var(--pf-document-text-body) !important;
+}
+
+.figma-root
+  [data-invoice-print-paper]
+  :where(
+    [data-testid="document-issuer-card-header"] span,
+    [data-testid="document-client-card-header"] span,
+    [data-testid="invoice-delivery-payment-card"] > div:first-child,
+    [data-testid="invoice-delivery-payment-card"] > div:first-child span,
+    [data-testid="invoice-mentions-card"] > div:first-child,
+    [data-testid="invoice-mentions-card"] > div:first-child span,
+    [data-testid="invoice-paper-meta-band"] > label > span,
+    [data-testid="invoice-paper-meta-band"] > div > span
+  ) {
+  font-size: var(--pf-document-text-caption) !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-document-tooltip-label],
+.figma-root [data-testid="invoice-document-preview"] [data-document-tooltip-label] {
+  font-size: var(--pf-document-text-caption) !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-document-party-name] {
+  font-size: var(--pf-document-party-name) !important;
+  font-weight: 800 !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-party-editable-field] {
+  grid-template-columns: minmax(0, 1fr) 1.5rem !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-party-edit-action] {
+  align-self: center !important;
+  justify-self: center !important;
+  margin-top: 0 !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-line-number-input] {
+  padding-left: 0.35rem !important;
+  padding-right: 0.35rem !important;
+}
+
+.figma-root
+  [data-testid="invoice-document-preview"]
+  :where(
+    [data-testid="invoice-preview-meta-band"],
+    [data-preview-party-card],
+    [data-testid="invoice-preview-delivery-payment-card"],
+    [data-testid="invoice-preview-mentions-card"],
+    table
+  )
+  :where(button, a, p, span, label, div, th, td, strong) {
+  font-size: var(--pf-document-text-body) !important;
+}
+
+.figma-root [data-testid="invoice-document-preview"] [data-document-party-name] {
+  font-size: var(--pf-document-party-name) !important;
+  font-weight: 800 !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-party-identity-row] {
+  grid-template-columns: 5rem minmax(0, 1fr);
+}
+
+.figma-root [data-invoice-print-paper] [data-party-identity-row] > span:first-child,
+.figma-root [data-testid="invoice-document-preview"] [data-party-identity-row] > span:first-child {
+  font-family: inherit !important;
+  font-size: var(--pf-document-text-body) !important;
+  font-weight: 600 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-party-identity-row] > span:last-child,
+.figma-root [data-testid="invoice-document-preview"] [data-party-identity-row] > span:last-child {
+  font-family: inherit !important;
+  white-space: normal !important;
+  overflow-wrap: anywhere;
+  font-size: var(--pf-document-text-body) !important;
+  font-weight: 600 !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-party-identity-value],
+.figma-root [data-testid="invoice-document-preview"] [data-party-identity-value] {
+  font-family: inherit !important;
+  font-size: var(--pf-document-text-body) !important;
+  font-weight: 600 !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="document-issuer-card-header"],
+.figma-root [data-invoice-print-paper] [data-testid="document-client-card-header"] {
+  height: 2.125rem !important;
+}
+
+.figma-root [data-testid="invoice-document-preview"] [data-preview-party-card] > div:first-child {
+  height: 2.125rem !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="document-issuer-card"],
+.figma-root [data-invoice-print-paper] [data-testid="document-client-card"],
+.figma-root [data-testid="invoice-document-preview"] [data-preview-party-card] {
+  border-radius: var(--pf-document-card-radius) !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="invoice-delivery-payment-card"],
+.figma-root [data-invoice-print-paper] [data-testid="invoice-mentions-card"] {
+  padding: 1rem !important;
+}
+
+.figma-root [data-invoice-print-paper] [data-testid="invoice-delivery-payment-card"] select,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-mentions-card"] select,
+.figma-root [data-invoice-print-paper] [data-testid="invoice-mentions-card"] input {
+  height: var(--pf-document-control-height) !important;
+}
+
+.figma-root [data-invoice-print-paper] table th,
+.figma-root [data-testid="invoice-document-preview"] table th,
+.figma-root [data-invoice-print-paper] [data-testid^="line-header-"],
+.figma-root [data-invoice-print-paper] [data-testid="line-columns-settings"] {
+  font-size: var(--pf-document-text-overline) !important;
+  font-weight: 650 !important;
+  letter-spacing: 0 !important;
+  text-transform: none !important;
+}
+
+.figma-root [data-invoice-print-paper] table td,
+.figma-root [data-testid="invoice-document-preview"] table td {
+  font-size: var(--pf-document-text-body) !important;
+}
+
+:where(.figma-root h1) {
+  font-size: var(--pf-app-text-title);
+  font-weight: 740;
+  line-height: var(--pf-app-line-tight);
+}
+
+:where(.figma-root h2) {
+  font-size: var(--pf-app-text-title);
+  font-weight: 700;
+  line-height: var(--pf-app-line-tight);
+}
+
+:where(.figma-root h3) {
+  font-size: var(--pf-app-text-body);
+  font-weight: 700;
+  line-height: var(--pf-app-line-normal);
+}
+
+:where(.figma-root h4),
+.figma-root label,
+.figma-root button {
+  font-size: var(--pf-app-text-body);
+  font-weight: 500;
+  line-height: var(--pf-app-line-normal);
+}
+
+.figma-root input,
+.figma-root textarea,
+.figma-root select {
+  font-size: var(--pf-app-text-body);
+  font-weight: 400;
+  line-height: 1.5;
+}
+
+.figma-root .app-bg {
+  background-color: #eef0f6;
+  background-image:
+    radial-gradient(ellipse at 20% 0%, rgba(29, 78, 216, 0.04) 0%, transparent 60%),
+    radial-gradient(ellipse at 80% 100%, rgba(124, 58, 237, 0.03) 0%, transparent 60%);
+}
+
+/* Shared authenticated-app surfaces. These classes are the visual contract for
+   list pages so Factures, Devis, Clients, Achats and Tresorerie stay aligned. */
+.figma-root .pf-list-card {
+  border: 1px solid rgba(219, 229, 239, 0.72);
+  border-radius: 18px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 3px rgba(15, 23, 42, 0.05),
+    0 14px 30px rgba(15, 23, 42, 0.06);
+}
+
+.figma-root .pf-list-toolbar {
+  min-height: 58px;
+  border-bottom: 1px solid #eef2f7;
+  background: #ffffff;
+}
+
+.figma-root .pf-filter-tabs {
+  gap: 0.375rem;
+}
+
+.figma-root .pf-toolbar-actions {
+  gap: 0.5rem;
+}
+
+.figma-root .pf-filter-panel {
+  border-bottom: 1px solid #e5edf5;
+  background: #f8fafc;
+}
+
+.figma-root .pf-filter-panel section {
+  padding: 1rem;
+}
+
+.figma-root .pf-filter-panel label {
+  color: #64748b;
+  font-size: var(--pf-app-text-overline);
+  font-weight: 600 !important;
+  line-height: var(--pf-app-line-normal);
+}
+
+.figma-root .pf-filter-panel input:not([type="checkbox"]),
+.figma-root .pf-filter-panel select {
+  height: 2.25rem;
+  border: 1px solid #dbe5ef;
+  border-radius: 0.75rem;
+  background: #ffffff;
+  color: #0f172a;
+  font-size: var(--pf-app-text-body);
+  font-weight: 500;
+}
+
+.figma-root .pf-filter-panel input[type="date"]:focus,
+.figma-root .pf-filter-panel input[type="date"]:focus-visible,
+.figma-root .pf-filter-panel input[type="month"]:focus,
+.figma-root .pf-filter-panel input[type="month"]:focus-visible,
+.figma-root .pf-filter-button input[type="date"]:focus,
+.figma-root .pf-filter-button input[type="date"]:focus-visible,
+.figma-root .pf-filter-button input[type="month"]:focus,
+.figma-root .pf-filter-button input[type="month"]:focus-visible {
+  border-color: #dbe5ef !important;
+  outline: none !important;
+  box-shadow: none !important;
+}
+
+.figma-root .pf-filter-panel input[type="date"]::selection,
+.figma-root .pf-filter-panel input[type="month"]::selection,
+.figma-root .pf-filter-button input[type="date"]::selection,
+.figma-root .pf-filter-button input[type="month"]::selection {
+  background: transparent;
+  color: inherit;
+}
+
+.figma-root .pf-filter-panel input[type="checkbox"] {
+  width: 1rem;
+  height: 1rem;
+  color: var(--pf-module-accent, var(--pf-invoice-primary)) !important;
+  accent-color: var(--pf-module-accent, var(--pf-invoice-primary)) !important;
+}
+
+.figma-root .pf-filter-button {
+  border-color: transparent !important;
+  background: var(--pf-module-soft, var(--pf-invoice-soft)) !important;
+  color: var(--pf-module-strong, var(--pf-invoice-primary)) !important;
+}
+
+.figma-root .pf-filter-button[aria-pressed="true"],
+.figma-root .pf-filter-button[data-active="true"] {
+  border-color: var(--pf-module-border, rgba(91, 94, 244, 0.25)) !important;
+  background: var(--pf-module-soft, var(--pf-invoice-soft)) !important;
+  color: var(--pf-module-strong, var(--pf-invoice-primary-strong)) !important;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.08);
+}
+
+.figma-root .pf-filter-button:focus-within {
+  box-shadow: none !important;
+  outline: none !important;
+}
+
+.figma-root .pf-document-focus-field:focus-within {
+  border-color: #2563eb !important;
+  background: #ffffff !important;
+  box-shadow:
+    0 0 0 2px #bfdbfe,
+    0 1px 2px rgba(15, 23, 42, 0.03) !important;
+}
+
+.figma-root .pf-filter-rail {
+  isolation: isolate;
+  max-width: min(100%, 43rem);
+}
+
+.figma-root .pf-filter-tabs-scroll {
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+
+.figma-root .pf-filter-tabs-scroll::-webkit-scrollbar {
+  display: none;
+}
+
+.figma-root .pf-filter-scroll-button {
+  display: inline-flex;
+  flex: 0 0 auto;
+  width: 1.875rem;
+  height: 1.875rem;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pf-module-border, #c7d2fe);
+  border-radius: 9999px;
+  background: #ffffff;
+  color: var(--pf-module-strong, #4a4ce0);
+  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.12);
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.figma-root .pf-filter-scroll-button:hover {
+  background: var(--pf-module-soft, #eff6ff);
+  transform: translateY(-1px);
+}
+
+.figma-root .pf-data-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  color: #334155;
+  font-size: var(--pf-app-text-body);
+  line-height: 1.35;
+}
+
+.figma-root .pf-data-table thead th {
+  padding: 0.625rem 1rem !important;
+  background: #fafbfd !important;
+  color: #94a3b8 !important;
+  font-size: var(--pf-app-table-header) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  line-height: var(--pf-app-line-tight);
+  text-transform: uppercase !important;
+  vertical-align: middle;
+  white-space: nowrap;
+}
+
+.figma-root .pf-data-table tbody tr {
+  border-bottom: 1px solid #f3f6fb;
+}
+
+.figma-root .pf-data-table tbody tr:hover {
+  background: var(--pf-module-soft, #f8fafc);
+}
+
+.figma-root .pf-data-table tbody tr.pf-clickable-row {
+  cursor: pointer;
+}
+
+.figma-root .pf-data-table tbody td {
+  padding: 0.75rem 1rem !important;
+  color: #4b5874;
+  font-size: var(--pf-app-text-body) !important;
+  font-weight: 500;
+  line-height: 1.25;
+  letter-spacing: 0;
+  vertical-align: middle;
+}
+
+.figma-root .pf-data-table thead th {
+  color: #94a3b8 !important;
+  font-size: var(--pf-app-table-header) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.15 !important;
+  text-transform: uppercase !important;
+}
+
+.figma-root .pf-data-table thead th button,
+.figma-root .pf-data-table thead th button span {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  line-height: inherit !important;
+  text-transform: inherit !important;
+}
+
+.figma-root .pf-data-table tbody td.pf-cash-amount-positive {
+  color: #15803d !important;
+}
+
+.figma-root .pf-data-table tbody td.pf-cash-amount-negative {
+  color: #dc2626 !important;
+}
+
+.figma-root .pf-sort-header-active {
+  color: var(--pf-sort-active, #ea580c) !important;
+}
+
+.figma-root .pf-sort-header-active :not(svg) {
+  color: inherit !important;
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  line-height: inherit !important;
+  text-transform: inherit !important;
+}
+
+.figma-root .pf-sort-header-active svg {
+  color: var(--pf-sort-active-icon, var(--pf-sort-active, #f97316)) !important;
+  stroke: currentColor !important;
+}
+
+.figma-root .pf-sort-header-quotes {
+  --pf-sort-active: #7c3aed;
+  --pf-sort-active-icon: #8b5cf6;
+}
+
+.figma-root .pf-sort-header-invoices {
+  --pf-sort-active: #2563eb;
+  --pf-sort-active-icon: #3b82f6;
+}
+
+.figma-root .pf-sort-header-purchases {
+  --pf-sort-active: #15803d;
+  --pf-sort-active-icon: #16a34a;
+}
+
+.figma-root .pf-sort-header-orange {
+  --pf-sort-active: #ea580c;
+  --pf-sort-active-icon: #f97316;
+}
+
+.figma-root .pf-purchases-table {
+  --pf-sort-active: #15803d;
+  --pf-sort-active-icon: #16a34a;
+}
+
+.figma-root .pf-data-table th:has(> input[type="checkbox"]),
+.figma-root .pf-data-table td:has(> input[type="checkbox"]) {
+  width: 2.25rem !important;
+  min-width: 2.25rem !important;
+  max-width: 2.25rem !important;
+  padding-left: 0.75rem !important;
+  padding-right: 0.35rem !important;
+}
+
+.figma-root .pf-data-table input[type="checkbox"],
+.figma-root .pf-data-list-header input[type="checkbox"],
+.figma-root .pf-data-list-row input[type="checkbox"] {
+  width: 1rem !important;
+  min-width: 1rem !important;
+  height: 1rem !important;
+  margin: 0 !important;
+  color: var(--pf-table-accent, var(--pf-module-accent, #2563eb)) !important;
+  accent-color: var(--pf-table-accent, var(--pf-module-accent, #2563eb));
+}
+
+.figma-root .pf-data-table th:last-child:empty {
+  width: 3.25rem !important;
+  min-width: 3.25rem !important;
+  max-width: 3.25rem !important;
+}
+
+.figma-root .pf-data-table td:last-child:has(.pf-action-icon):not(.pf-row-actions-cell) {
+  width: 3.25rem !important;
+  min-width: 3.25rem !important;
+  max-width: 3.25rem !important;
+  padding-left: 0.35rem !important;
+  padding-right: 0.75rem !important;
+  text-align: right;
+}
+
+.figma-root .pf-data-table td.pf-row-actions-cell {
+  width: 10.25rem !important;
+  min-width: 10.25rem !important;
+  max-width: none !important;
+  padding-left: 1.25rem !important;
+  padding-right: 0.75rem !important;
+  text-align: right;
+  white-space: nowrap;
+}
+
+.figma-root .pf-row-actions {
+  flex-wrap: nowrap;
+  white-space: nowrap;
+}
+
+.figma-root .pf-primary-row-action {
+  min-width: 5.75rem;
+}
+
+.figma-root .pf-purchase-primary-action {
+  min-width: 6.75rem;
+}
+
+.figma-root .pf-header-blue-action,
+.figma-root .pf-header-blue-menu > button,
+.figma-root .pf-selection-action-menu > button {
+  height: 2.25rem;
+  border-color: #dbeafe !important;
+  border-radius: 0.5rem !important;
+  background: #ffffff !important;
+  color: #1d4ed8 !important;
+  padding-inline: 0.875rem !important;
+  font-weight: 750 !important;
+  box-shadow: 0 6px 16px -14px rgba(29, 78, 216, 0.75) !important;
+}
+
+.figma-root .pf-header-blue-action:hover,
+.figma-root .pf-header-blue-menu > button:hover,
+.figma-root .pf-selection-action-menu > button:hover {
+  background: #eff6ff !important;
+}
+
+.figma-root .pf-header-blue-action svg,
+.figma-root .pf-header-blue-menu > button svg,
+.figma-root .pf-selection-action-menu > button svg {
+  color: #1d4ed8 !important;
+}
+
+.figma-root .pf-header-primary-blue-menu > button {
+  height: 2.25rem;
+  border-color: #1d4ed8 !important;
+  border-radius: 0.5rem !important;
+  background: #1d4ed8 !important;
+  color: #ffffff !important;
+  padding-inline: 0.875rem !important;
+  font-weight: 750 !important;
+  box-shadow: 0 10px 22px -16px rgba(29, 78, 216, 0.85) !important;
+}
+
+.figma-root .pf-header-primary-blue-menu > button:hover {
+  background: #1e40af !important;
+}
+
+.figma-root .pf-header-primary-blue-menu > button svg {
+  color: #ffffff !important;
+}
+
+.figma-root .pf-selection-action-menu > button {
+  background: #eff6ff !important;
+  border-color: #bfdbfe !important;
+}
+
+.figma-root .pf-row-action-menu button[aria-label^="Actions"] {
+  width: 2rem;
+  height: 2rem;
+  border-color: #ddd6fe !important;
+  border-radius: 9999px !important;
+  background: #f5f3ff !important;
+  color: #6d28d9 !important;
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04) !important;
+}
+
+.figma-root .pf-row-action-menu button[aria-label^="Actions"]:hover {
+  background: #ede9fe !important;
+}
+
+.figma-root .pf-invoice-row-action-menu button[aria-label^="Actions"] {
+  border-color: #bfdbfe !important;
+  background: #eff6ff !important;
+  color: #1d4ed8 !important;
+}
+
+.figma-root .pf-invoice-row-action-menu button[aria-label^="Actions"]:hover {
+  background: #dbeafe !important;
+}
+
+.figma-root .pf-purchases-table {
+  table-layout: auto !important;
+}
+
+.figma-root .pf-data-table :is(a, p, span, div) {
+  letter-spacing: 0;
+}
+
+.figma-root .pf-data-table :is(.font-black, .font-extrabold, .font-bold, .font-semibold) {
+  font-weight: 600 !important;
+}
+
+.figma-root .pf-data-table .font-mono {
+  font-family: inherit !important;
+}
+
+.figma-root .pf-data-table :is(.text-xs, .text-sm) {
+  font-size: var(--pf-app-text-body);
+}
+
+.figma-root .pf-data-table .pf-table-amount {
+  color: #0f172a;
+  font-size: var(--pf-app-text-body);
+  font-weight: 600;
+}
+
+@media (max-width: 640px) {
+  .figma-root .pf-data-table {
+    min-width: 0 !important;
+    table-layout: fixed;
+  }
+
+  .figma-root .pf-data-table thead th,
+  .figma-root .pf-data-table tbody td {
+    padding: 0.75rem 0.5rem !important;
+    white-space: normal;
+  }
+
+  .figma-root .pf-data-table :is(th, td):nth-child(n + 4):not(:last-child) {
+    display: none !important;
+  }
+
+  .figma-root .pf-mobile-row-summary {
+    display: flex !important;
+  }
+
+  .figma-root .pf-data-table :is(a, button) {
+    min-height: 2.75rem;
+    align-items: center;
+  }
+
+  .figma-root .pf-data-table input[type="checkbox"],
+  .figma-root .pf-data-list-header input[type="checkbox"],
+  .figma-root .pf-data-list-row input[type="checkbox"] {
+    width: 1.25rem !important;
+    height: 1.25rem !important;
+  }
+
+  .figma-root .pf-row-action-menu button[aria-label^="Actions"],
+  .figma-root .pf-invoice-row-action-menu button[aria-label^="Actions"] {
+    width: 2.75rem !important;
+    height: 2.75rem !important;
+  }
+
+  .figma-root .pf-data-list-header {
+    display: none !important;
+  }
+
+  .figma-root .pf-data-list-row {
+    min-width: 0 !important;
+    grid-template-columns: 2.75rem minmax(0, 1fr) !important;
+    gap: 0.75rem !important;
+    padding: 0.75rem !important;
+  }
+
+  .figma-root .pf-data-list-row > a {
+    grid-column: auto !important;
+    display: grid !important;
+    min-width: 0 !important;
+    grid-template-columns: minmax(0, 1fr) 2.75rem !important;
+    gap: 0.75rem !important;
+    align-items: center;
+  }
+
+  .figma-root .pf-data-list-row > a > :nth-child(n + 2):not(:last-child) {
+    display: none !important;
+  }
+
+  .figma-root .pf-data-list-row .pf-action-icon {
+    display: inline-flex;
+    width: 2.75rem;
+    height: 2.75rem;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.figma-root .pf-mobile-row-summary {
+  display: none;
+}
+
+.figma-root .pf-data-list-header {
+  border-bottom: 1px solid #eef2f7;
+  background: #fafbfd;
+}
+
+.figma-root .pf-data-list-header > div {
+  color: #94a3b8 !important;
+  font-size: var(--pf-app-table-header) !important;
+  font-weight: 700 !important;
+  letter-spacing: 0.04em !important;
+  line-height: 1.15 !important;
+  text-transform: uppercase !important;
+}
+
+.figma-root .pf-data-list-header > div button,
+.figma-root .pf-data-list-header > div button span {
+  font-size: inherit !important;
+  font-weight: inherit !important;
+  letter-spacing: inherit !important;
+  line-height: inherit !important;
+  text-transform: inherit !important;
+}
+
+.figma-root .pf-data-list-row {
+  border-bottom: 1px solid #f3f6fb;
+  color: #334155;
+}
+
+.figma-root .pf-data-list-row:hover {
+  background: var(--pf-module-soft, #f8fafc);
+}
+
+.figma-root .pf-row-title {
+  color: #1f2a44 !important;
+  font-size: var(--pf-app-text-body) !important;
+  font-weight: 600 !important;
+  line-height: 1.2;
+}
+
+.figma-root .pf-doc-number {
+  color: var(--pf-module-accent, var(--pf-invoice-primary)) !important;
+  font-size: var(--pf-app-text-body) !important;
+  font-weight: 600 !important;
+  line-height: 1.2;
+}
+
+.figma-root .pf-row-subtitle {
+  color: #94a3b8 !important;
+  font-size: var(--pf-app-text-caption) !important;
+  font-weight: 400 !important;
+  line-height: 1.2;
+}
+
+.figma-root .pf-action-icon {
+  display: inline-flex;
+  width: 2rem !important;
+  height: 2rem !important;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--pf-action-border, var(--pf-module-soft, #bfdbfe));
+  border-radius: 9999px;
+  background: var(--pf-action-bg, var(--pf-module-soft, #eff6ff));
+  color: var(--pf-action-color, var(--pf-module-accent, #2563eb));
+  box-shadow: 0 1px 2px rgba(15, 23, 42, 0.04);
+  transition:
+    background-color 120ms ease,
+    border-color 120ms ease,
+    box-shadow 120ms ease,
+    color 120ms ease,
+    transform 120ms ease;
+}
+
+.figma-root .pf-action-icon:hover {
+  border-color: var(--pf-action-hover-border, var(--pf-module-accent, #93c5fd));
+  background: var(--pf-action-hover-bg, var(--pf-module-soft, #dbeafe));
+  color: var(--pf-action-hover-color, var(--pf-module-strong, #1d4ed8));
+  box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+  transform: translateX(1px);
+}
+
+.figma-root .pf-action-icon--invoice {
+  --pf-action-bg: #eff6ff;
+  --pf-action-border: #bfdbfe;
+  --pf-action-color: #1d4ed8;
+  --pf-action-hover-bg: #dbeafe;
+  --pf-action-hover-border: #93c5fd;
+  --pf-action-hover-color: #1e40af;
+}
+
+.figma-root .pf-action-icon--quote {
+  --pf-action-bg: #f5f3ff;
+  --pf-action-border: #ddd6fe;
+  --pf-action-color: #7c3aed;
+  --pf-action-hover-bg: #ede9fe;
+  --pf-action-hover-border: #c4b5fd;
+  --pf-action-hover-color: #6d28d9;
+}
+
+.figma-root .pf-action-icon--customer {
+  --pf-action-bg: #fff7ed;
+  --pf-action-border: #fed7aa;
+  --pf-action-color: #ea580c;
+  --pf-action-hover-bg: #ffedd5;
+  --pf-action-hover-border: #fdba74;
+  --pf-action-hover-color: #c2410c;
+}
+
+.figma-root .pf-action-icon--cash {
+  --pf-action-bg: #fff7ed;
+  --pf-action-border: #fed7aa;
+  --pf-action-color: #ea580c;
+  --pf-action-hover-bg: #ffedd5;
+  --pf-action-hover-border: #fdba74;
+  --pf-action-hover-color: #c2410c;
+}
+
+.figma-root .pf-action-icon--purchase {
+  --pf-action-bg: #f0fdf4;
+  --pf-action-border: #bbf7d0;
+  --pf-action-color: #15803d;
+  --pf-action-hover-bg: #dcfce7;
+  --pf-action-hover-border: #86efac;
+  --pf-action-hover-color: #166534;
+}

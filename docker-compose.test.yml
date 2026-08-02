@@ -1,0 +1,47 @@
+services:
+  backend-test:
+    build:
+      context: ./backend
+      target: test
+    env_file:
+      - ./.env.example
+    environment:
+      APP_ENV: test
+      AUTH_COOKIE_MODE: "true"
+      BEARER_MODE: "false"
+      CORS_ORIGINS: "http://testserver"
+      PUBLIC_BASE_URL: "http://testserver"
+      FRONTEND_BASE_URL: "http://testserver"
+      NEXT_PUBLIC_API_ORIGIN: "http://testserver"
+      COOKIE_DOMAIN: ""
+      COOKIE_SECURE: "false"
+      FACTURX_PROFILE: ""
+      FACTURX_STRICT: "false"
+      ALLOWED_HOSTS: "testserver,localhost,127.0.0.1"
+      TRUSTED_HOSTS: "testserver,localhost,127.0.0.1"
+      REDIS_URL: ""
+      SENTRY_DSN: ""
+      DATABASE_URL: sqlite:////tmp/test.db
+      STORAGE_PROVIDER: "local"
+      TEST_DATABASE_URL: sqlite:////tmp/test.db
+      STORAGE_LOCAL_PATH: /tmp/test-storage
+      RUN_MIGRATIONS_ON_STARTUP: "false"
+      STRIPE_SECRET_KEY: ""
+      STRIPE_WEBHOOK_SECRET: ""
+      SMTP_ENABLED: "false"
+      SMTP_HOST: ""
+      SMTP_USERNAME: ""
+      SMTP_PASSWORD: ""
+      SEQINO_API_KEY: ""
+      SEQINO_WEBHOOK_SECRET: ""
+      CHORUS_CLIENT_ID: ""
+      CHORUS_CLIENT_SECRET: ""
+    entrypoint: []
+    command: ["python", "-m", "pytest", "-p", "no:cacheprovider", "tests", "-q"]
+    user: root
+    working_dir: /workspace/backend
+    volumes:
+      # Keep backend/tests two levels below the real repository root so release
+      # and hygiene tests resolve the current worktree without treating `/` as
+      # the source directory.
+      - ./:/workspace

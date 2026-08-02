@@ -1,0 +1,54 @@
+version: "v3.1"
+spec_date: "2025-10-31"
+title: "Specifications externes B2B"
+scope: "FR B2B"
+fields:
+  - key: "supplier.siren"
+    label: "SIREN fournisseur"
+    required: true
+    rules:
+      - "9 digits"
+      - "derive from SIRET if needed"
+  - key: "customer.siren"
+    label: "SIREN client"
+    required: true
+    rules:
+      - "9 digits"
+      - "derive from SIRET if needed"
+  - key: "invoice.number"
+    label: "Numero de facture"
+    required: true
+  - key: "invoice.issue_date"
+    label: "Date de facture"
+    required: true
+  - key: "invoice.currency"
+    label: "Devise"
+    required: true
+  - key: "invoice.operation_nature"
+    label: "Nature d'operation"
+    required: true
+    codes: ["LB", "PS", "LBPS"]
+  - key: "invoice.total_ex_vat"
+    label: "Montant HT"
+    required: true
+  - key: "invoice.total_vat"
+    label: "Montant TVA"
+    required: true
+  - key: "invoice.total_inc_vat"
+    label: "Montant TTC"
+    required: true
+  - key: "lines.exemption_reason_code"
+    label: "Motif d'exoneration TVA"
+    required: "if VAT exempt or zero"
+constraints:
+  - key: "totals_consistency"
+    label: "TTC = HT + TVA"
+  - key: "lines_sum_ht"
+    label: "Somme lignes HT = total HT"
+  - key: "lines_sum_vat"
+    label: "Somme TVA lignes = total TVA"
+code_lists:
+  operation_nature:
+    goods: "LB"
+    services: "PS"
+    mixed: "LBPS"

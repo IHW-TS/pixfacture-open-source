@@ -1,0 +1,60 @@
+.wizardCard {
+  display: grid;
+  gap: 12px;
+}
+
+.wizardRow {
+  justify-content: space-between;
+  align-items: center;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.wizardStepMeta {
+  min-width: 240px;
+}
+
+.wizardStepTitle {
+  font-weight: 700;
+}
+
+.wizardActions {
+  gap: 8px;
+  align-items: center;
+}
+
+.wizardMetaCard {
+  display: grid;
+  gap: 12px;
+  margin-top: 12px;
+}
+
+.wizardMetaRow {
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
+}
+
+.wizardMetaTitle {
+  font-weight: 700;
+}
+
+.wizardErrorTitle {
+  font-weight: 700;
+}
+
+.wizardErrorList {
+  margin: 6px 0 0;
+}
+
+.wizardWarning {
+  margin-top: 12px;
+}
+
+.wizardCta {
+  margin-top: 12px;
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}

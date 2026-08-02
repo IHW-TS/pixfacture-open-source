@@ -1,0 +1,16 @@
+{
+  "extends": ["next/core-web-vitals", "prettier"],
+  "rules": {
+    "react/no-unescaped-entities": "off",
+    "react/display-name": "off",
+    "import/no-anonymous-default-export": "off"
+  },
+  "overrides": [
+    {
+      "files": ["src/figma/app/pages/app/**/*.{ts,tsx}"],
+      "rules": {
+        "react/jsx-no-duplicate-props": "off"
+      }
+    }
+  ]
+}

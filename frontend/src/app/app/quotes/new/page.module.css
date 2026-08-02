@@ -1,0 +1,97 @@
+.page {
+  gap: 18px;
+}
+
+.topGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 14px;
+  align-items: start;
+}
+
+.quickActions :global(.input) {
+  flex: 1 1 280px;
+  min-width: min(280px, 100%);
+}
+
+.clientGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 12px;
+}
+
+.dateGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+
+.lineCard {
+  padding: 16px;
+  gap: 12px;
+}
+
+.linesList {
+  gap: 12px;
+}
+
+.lineMain {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  align-items: end;
+}
+
+.lineValues {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: 10px;
+  margin-top: 10px;
+  align-items: end;
+}
+
+.totalCard {
+  width: min(360px, 100%);
+}
+
+.noteInput {
+  min-height: 120px;
+}
+
+@media (min-width: 980px) {
+  .dateGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .lineValues {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1280px) {
+  .topGrid {
+    grid-template-columns: minmax(0, 0.92fr) minmax(0, 1.08fr);
+  }
+
+  .lineMain {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+}
+
+@media (min-width: 1640px) {
+  .lineValues {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+
+@media (max-width: 900px) {
+  .quickActions :global(.input) {
+    min-width: 100%;
+    flex-basis: 100%;
+  }
+
+  .lineCard {
+    padding: 14px;
+  }
+}

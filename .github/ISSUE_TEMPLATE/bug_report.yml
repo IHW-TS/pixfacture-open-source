@@ -1,0 +1,60 @@
+name: Rapport de bug
+description: Signaler un comportement reproductible de PixFacture
+title: "[Bug] "
+labels:
+  - bug
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Merci de ne joindre aucune facture réelle, donnée client, clé ou capture privée.
+        Les vulnérabilités doivent être signalées selon SECURITY.md.
+  - type: input
+    id: version
+    attributes:
+      label: Version ou commit
+      placeholder: v0.1.0 ou SHA du commit
+    validations:
+      required: true
+  - type: dropdown
+    id: area
+    attributes:
+      label: Zone concernée
+      options:
+        - Frontend
+        - Backend/API
+        - Factur-X / EN 16931
+        - Docker / déploiement
+        - Documentation
+        - Autre
+    validations:
+      required: true
+  - type: textarea
+    id: description
+    attributes:
+      label: Description
+      description: Décrivez le résultat observé et le résultat attendu.
+    validations:
+      required: true
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Étapes de reproduction
+      placeholder: |
+        1. Démarrer…
+        2. Ouvrir…
+        3. Constater…
+    validations:
+      required: true
+  - type: textarea
+    id: environment
+    attributes:
+      label: Environnement
+      description: OS, navigateur, versions Python/Node et mode de déploiement.
+  - type: checkboxes
+    id: safety
+    attributes:
+      label: Données sensibles
+      options:
+        - label: J’ai retiré les secrets, données personnelles et données clients.
+          required: true

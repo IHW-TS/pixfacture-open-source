@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="fr">
+<body style="font-family:Arial, sans-serif; color:#111; line-height:1.6; padding:16px;">
+  <div style="margin:0 0 8px 0;font-size:12px;font-weight:700;letter-spacing:0.04em;text-transform:uppercase;color:#475569;">
+    {{ brand_name or product_name or 'PixFacture' }}
+  </div>
+  <h2 style="margin:0 0 12px 0;">{{ heading }}</h2>
+  <p>Bonjour,</p>
+  {% for paragraph in paragraphs %}
+  <p>{{ paragraph }}</p>
+  {% endfor %}
+  <p>
+    <a href="{{ action_url }}" style="background:#0f172a;color:#fff;padding:10px 16px;text-decoration:none;border-radius:6px;display:inline-block;">{{ action_label }}</a>
+  </p>
+  <p>Ne partagez jamais vos identifiants. Chaque espace d’essai est personnel et isolé des autres entreprises.</p>
+  <p style="margin-top:18px;color:#64748b;font-size:12px;">Vous recevez cet email car un espace d’essai {{ product_name or 'PixFacture' }} est associé à cette adresse.</p>
+</body>
+</html>

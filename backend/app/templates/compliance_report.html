@@ -1,0 +1,131 @@
+<!doctype html>
+<html><head><meta charset="utf-8"><style>
+body{font-family:DejaVu Sans,Arial;margin:24px;font-size:12px;color:#111}
+h1{margin:0 0 6px 0}
+h2{margin:16px 0 6px 0;font-size:14px}
+table{border-collapse:collapse;width:100%}td,th{border:1px solid #ddd;padding:6px;vertical-align:top}
+th{background:#f8f8f8;text-align:left}
+.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:11px;font-weight:700;text-transform:uppercase}
+.badge.ok{background:#e7f6f1;color:#0e7f63}
+.badge.warning{background:#f8edd5;color:#8a5a12}
+.badge.error{background:#fdecea;color:#8a1c1c}
+.badge.unavailable{background:#eee;color:#555}
+.muted{color:#6b7280;font-size:11px}
+ul{margin:6px 0 0 16px;padding:0}
+</style></head><body>
+<h1>Rapport de conformité</h1>
+<div class="muted">Généré le {{ report.generated_at }}</div>
+
+<h2>Contexte</h2>
+<table><tbody>
+  <tr>
+    <th>Facture</th><td>{{ report.invoice.number or report.invoice.id }}</td>
+    <th>Statut</th><td>{{ report.invoice.status }}</td>
+  </tr>
+  <tr>
+    <th>Date facture</th><td>{{ report.invoice.issue_date or '—' }}</td>
+    <th>Horodatage emission</th><td>{{ report.timestamps.issued_at or '—' }}</td>
+  </tr>
+  <tr>
+    <th>Client</th><td>{{ report.customer.name or '—' }}</td>
+    <th>Entreprise</th><td>{{ report.tenant.name or '—' }}</td>
+  </tr>
+  <tr>
+    <th>Factur-X</th><td>Profil {{ report.facturx.profile }} • Spec {{ report.facturx.spec_version }}</td>
+    <th>Devise</th><td>{{ report.invoice.currency }}</td>
+  </tr>
+</tbody></table>
+
+<h2>Horodatage</h2>
+<table><tbody>
+  <tr><th>Creation</th><td>{{ report.timestamps.created_at or '—' }}</td></tr>
+  <tr><th>Envoi</th><td>{{ report.timestamps.sent_at or '—' }}</td></tr>
+  <tr><th>Paiement</th><td>{{ report.timestamps.paid_at or '—' }}</td></tr>
+  <tr><th>Transmission (maj)</th><td>{{ report.timestamps.transmission_updated_at or '—' }}</td></tr>
+  <tr><th>Rapport genere</th><td>{{ report.generated_at }}</td></tr>
+</tbody></table>
+
+<h2>Résumé</h2>
+{% set summary_status = report.summary.status or 'ok' %}
+<div>
+  <span class="badge {{ summary_status }}">{{ summary_status }}</span>
+</div>
+{% if report.summary.blocking_issues and report.summary.blocking_issues|length > 0 %}
+  <p><b>Blocages</b></p>
+  <ul>
+    {% for issue in report.summary.blocking_issues %}
+      <li>{{ issue.message }}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="muted">Aucun blocage détecté.</div>
+{% endif %}
+{% if report.summary.warnings and report.summary.warnings|length > 0 %}
+  <p><b>Avertissements</b></p>
+  <ul>
+    {% for issue in report.summary.warnings %}
+      <li>{{ issue.message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+<h2>Contrôles internes (CII)</h2>
+{% set en_status = report.sanity_checks.status or 'ok' %}
+<div>
+  <span class="badge {{ en_status }}">{{ en_status }}</span>
+</div>
+{% if report.sanity_checks.errors and report.sanity_checks.errors|length > 0 %}
+  <ul>
+    {% for err in report.sanity_checks.errors %}
+      <li>{{ err }}</li>
+    {% endfor %}
+  </ul>
+{% else %}
+  <div class="muted">Aucune erreur remontée.</div>
+{% endif %}
+
+<h2>Contrôles FR 2026</h2>
+{% if report.fr_checks and report.fr_checks|length > 0 %}
+  <table><thead><tr><th>Statut</th><th>Message</th><th>Cible</th><th>Champ</th></tr></thead><tbody>
+    {% for check in report.fr_checks %}
+      <tr>
+        <td>{{ check.status }}</td>
+        <td>{{ check.message }}</td>
+        <td>{{ check.target }}</td>
+        <td>{{ check.field }}</td>
+      </tr>
+    {% endfor %}
+  </tbody></table>
+{% else %}
+  <div class="muted">Aucun contrôle FR applicable.</div>
+{% endif %}
+
+<h2>PDF/A-3</h2>
+<table><tbody>
+  <tr><th>Statut</th><td>{{ report.pdfa.stored_status or 'n/d' }}</td></tr>
+  <tr><th>Rapport</th><td>{{ report.pdfa.stored_report or '—' }}</td></tr>
+  <tr><th>Hash (SHA-256)</th><td>{{ report.pdfa.sha256 or '—' }}</td></tr>
+  {% if report.pdfa.verapdf and report.pdfa.verapdf.available %}
+    <tr><th>veraPDF</th><td>{{ 'OK' if report.pdfa.verapdf.ok else 'KO' }}</td></tr>
+    <tr><th>veraPDF output</th><td>{{ report.pdfa.verapdf.output or '—' }}</td></tr>
+  {% endif %}
+</tbody></table>
+
+<h2>Transmission</h2>
+{% set tx_status = report.transmission.status or 'not_sent' %}
+<table><tbody>
+  <tr><th>Statut</th><td><span class="badge {{ tx_status }}">{{ tx_status }}</span></td></tr>
+  <tr><th>Canal</th><td>{{ report.transmission.channel or '—' }}</td></tr>
+  <tr><th>External ID</th><td>{{ report.transmission.external_id or '—' }}</td></tr>
+  <tr><th>Payload hash</th><td>{{ report.transmission.payload_hash or '—' }}</td></tr>
+  <tr><th>Mis a jour</th><td>{{ report.transmission.updated_at or '—' }}</td></tr>
+</tbody></table>
+
+<h2>Empreintes d'artefacts</h2>
+<table><thead><tr><th>Artefact</th><th>Disponible</th><th>SHA-256</th></tr></thead><tbody>
+  <tr><td>PDF</td><td>{{ 'oui' if report.artifacts.pdf.available else 'non' }}</td><td>{{ report.artifacts.pdf.sha256 or '—' }}</td></tr>
+  <tr><td>CII XML</td><td>{{ 'oui' if report.artifacts.cii_xml.available else 'non' }}</td><td>{{ report.artifacts.cii_xml.sha256 or '—' }}</td></tr>
+  <tr><td>Factur-X PDF</td><td>{{ 'oui' if report.artifacts.facturx_pdf.available else 'non' }}</td><td>{{ report.artifacts.facturx_pdf.sha256 or '—' }}</td></tr>
+  <tr><td>Hash facture (PDF+XML)</td><td colspan="2">{{ report.artifacts.issued_hash or '—' }}</td></tr>
+</tbody></table>
+</body></html>

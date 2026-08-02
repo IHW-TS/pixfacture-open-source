@@ -1,0 +1,11 @@
+.root {
+  display: grid;
+  gap: 8px;
+}
+
+.warning {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  flex-wrap: wrap;
+}

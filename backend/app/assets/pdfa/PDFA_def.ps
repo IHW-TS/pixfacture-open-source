@@ -1,0 +1,21 @@
+%!
+% PDFA_def.ps - PDF/A-3 OutputIntent with sRGB ICC profile.
+% The __SRGB_ICC__ placeholder is replaced at runtime with the ICC path.
+
+/ICCProfile (__SRGB_ICC__) def
+/OutputConditionIdentifier (sRGB IEC61966-2.1) def
+/Info (sRGB IEC61966-2.1) def
+
+[ /_objdef {icc_profile} /type /stream /OBJ pdfmark
+[ {icc_profile} ICCProfile (r) file /PUT pdfmark
+[ {icc_profile} << /N 3 >> /PUT pdfmark
+
+[ /_objdef {OutputIntent} /type /dict /OBJ pdfmark
+[ {OutputIntent} <<
+  /Type /OutputIntent
+  /S /GTS_PDFA3
+  /OutputConditionIdentifier OutputConditionIdentifier
+  /Info Info
+  /DestOutputProfile {icc_profile}
+>> /PUT pdfmark
+%%EOF
